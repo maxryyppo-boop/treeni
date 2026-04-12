@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Treeni">
+<meta name="theme-color" content="#0f0f0f">
+<title>Treeni</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;--bg5:#333;
+  --text:#f5f5f5;--text2:#888;--text3:#555;
+  --border:#2a2a2a;--border2:#333;--border3:#3a3a3a;
+  --green:#34c759;--green-dim:rgba(52,199,89,.15);
+  --blue:#0a84ff;--blue-dim:rgba(10,132,255,.12);
+  --red:#ff453a;--red-dim:rgba(255,69,58,.12);
+  --yellow:#ffd60a;--yellow-dim:rgba(255,214,10,.12);
+  --purple:#bf5af2;--purple-dim:rgba(191,90,242,.12);
+  --push:#ff6b6b;--push-dim:rgba(255,107,107,.1);
+  --pull:#4da6ff;--pull-dim:rgba(77,166,255,.1);
+  --legs:#4cd964;--legs-dim:rgba(76,217,100,.1);
+  --r:14px;--r-sm:10px;--r-xs:8px;
+  --safe-t:env(safe-area-inset-top,44px);
+  --safe-b:env(safe-area-inset-bottom,20px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;overflow:hidden;font-size:15px}
+#app{height:100%;display:flex;flex-direction:column;padding-top:var(--safe-t)}
+#screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;-webkit-overflow-scrolling:touch}
+.screen.active{display:block}
+.topbar{padding:14px 16px 10px;display:flex;align-items:flex-start;gap:12px;position:sticky;top:0;background:var(--bg);z-index:20;border-bottom:1px solid var(--border)}
+.topbar-title{font-size:22px;font-weight:700;flex:1;letter-spacing:-.4px}
+.topbar-sub{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* NAVBAR */
+#navbar{display:flex;background:var(--bg2);border-top:1px solid var(--border);padding-bottom:var(--safe-b);flex-shrink:0}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 6px;border:none;background:none;color:var(--text3);font-size:10px;font-weight:500;cursor:pointer;transition:color .15s}
+.nb svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor}
+.nb.active{color:var(--blue)}
+.nb.active svg{stroke:var(--blue)}
+
+/* WEEK STRIP */
+.week-strip{padding:14px 16px 0;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.wday{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .15s}
+.wday.today{border-color:var(--blue)}
+.wday.done{background:var(--green-dim);border-color:rgba(52,199,89,.4)}
+.wday-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text3)}
+.wday.today .wday-lbl{color:var(--blue)}
+.wday.done .wday-lbl{color:var(--green)}
+.wday-dot{width:5px;height:5px;border-radius:50%;background:var(--border3)}
+.wday.done .wday-dot{background:var(--green)}
+.wday.today:not(.done) .wday-dot{background:var(--blue)}
+.wday-type{font-size:8px;color:var(--text3);font-weight:500;letter-spacing:.2px}
+
+/* STREAK ROW */
+.streak-row{display:flex;gap:10px;padding:12px 16px 0}
+.streak-box{background:var(--yellow-dim);border:1px solid rgba(255,214,10,.2);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;flex:1}
+.streak-num{font-size:24px;font-weight:700;color:var(--yellow);line-height:1}
+.streak-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+.vol-box{background:var(--blue-dim);border:1px solid rgba(10,132,255,.2);border-radius:var(--r-sm);padding:10px 14px;flex:1}
+.vol-num{font-size:24px;font-weight:700;color:var(--blue);line-height:1}
+.vol-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* DAY CARDS */
+.day-wrap{padding:12px 16px 0}
+.day-card{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
+.day-card.today{border-color:var(--blue);border-width:1.5px}
+.day-top{padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.day-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.day-info{flex:1}
+.day-name{font-size:16px;font-weight:600;letter-spacing:-.2px}
+.day-type{font-size:12px;color:var(--text2);margin-top:2px;font-weight:500}
+.pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.day-chevron{color:var(--text3);font-size:11px;transition:transform .2s;flex-shrink:0;margin-left:2px}
+.day-chevron.open{transform:rotate(90deg)}
+.day-body{border-top:1px solid var(--border);display:none;padding-bottom:4px}
+.day-body.open{display:block}
+
+/* EX BLOCK */
+.ex-block{padding:13px 16px 10px;border-bottom:1px solid var(--border)}
+.ex-block:last-child{border-bottom:none}
+.ex-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ex-name{font-size:15px;font-weight:600;color:var(--blue);flex:1;line-height:1.2}
+.ex-btn{font-size:11px;color:var(--text3);background:var(--bg3);border:none;border-radius:6px;padding:4px 8px;cursor:pointer}
+
+/* SET TABLE */
+.set-thead{display:grid;grid-template-columns:26px 1fr 76px 76px 34px;gap:6px;padding:0 0 6px;border-bottom:1px solid var(--border)}
+.set-thead span{font-size:11px;color:var(--text3);font-weight:600;text-align:center;text-transform:uppercase;letter-spacing:.4px}
+.set-thead span:nth-child(2){text-align:left}
+.set-row{display:grid;grid-template-columns:26px 1fr 76px 76px 34px;gap:6px;align-items:center;padding:4px 0}
+.set-num{font-size:13px;color:var(--text3);text-align:center;font-weight:500}
+.set-prev{font-size:12px;color:var(--text3);padding-left:2px;line-height:1.3}
+.set-inp{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 4px;font-size:15px;font-weight:600;color:var(--text);text-align:center;width:100%;outline:none;transition:all .15s}
+.set-inp:focus{border-color:var(--blue);background:var(--bg4)}
+.set-inp.done{background:var(--green-dim);border-color:rgba(52,199,89,.4);color:var(--green)}
+.check-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border3);background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
+.check-btn.done{background:var(--green);border-color:var(--green)}
+.check-btn svg{width:14px;height:14px;stroke:var(--text3);stroke-width:2.5;fill:none;transition:stroke .15s}
+.check-btn.done svg{stroke:#fff}
+.add-set-btn{width:100%;padding:9px;border:none;background:none;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;text-align:center;margin-top:2px;opacity:.8}
+.pr-banner{background:var(--yellow-dim);border:1px solid rgba(255,214,10,.3);border-radius:var(--r-xs);padding:9px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pr-text{font-size:13px;font-weight:600;color:var(--yellow)}
+
+/* FINISH */
+.finish-btn{margin:4px 16px 20px;padding:14px;border-radius:var(--r);border:none;background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px);letter-spacing:-.2px;display:none}
+
+/* SUMMARY */
+#summary{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+#summary.open{display:flex}
+.sum-box{background:var(--bg2);border:1px solid var(--border3);border-radius:20px;padding:28px 24px;width:100%;max-width:360px;text-align:center}
+.sum-emoji{font-size:52px;margin-bottom:12px}
+.sum-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.sum-sub{font-size:14px;color:var(--text2);margin-bottom:22px;line-height:1.5}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px}
+.sg{background:var(--bg3);border-radius:var(--r-sm);padding:12px 8px;text-align:center}
+.sg-val{font-size:22px;font-weight:700}
+.sg-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+.sum-close{width:100%;padding:14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+
+/* SEURANTA */
+.sec-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:18px 16px 8px}
+.stats-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat-val{font-size:26px;font-weight:700;margin-top:5px;letter-spacing:-.5px;line-height:1.1}
+.stat-unit{font-size:13px;font-weight:400;color:var(--text2)}
+.w-form{margin:0 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:10px;align-items:center}
+.w-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 14px;font-size:16px;font-weight:600;color:var(--text);outline:none}
+.w-inp:focus{border-color:var(--blue)}
+.w-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--r-sm);padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer}
+
+/* CHART */
+.chart-wrap{margin:0 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;overflow:hidden}
+.chart-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px}
+#weight-chart{width:100%;height:140px;display:block}
+
+/* PROGRESS CARDS */
+.prog-list{margin:0 16px;display:flex;flex-direction:column;gap:8px}
+.prog-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.prog-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.prog-name{font-size:14px;font-weight:600;flex:1}
+.prog-gain{font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px}
+.prog-bar-bg{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.prog-bar{height:4px;border-radius:2px;transition:width .4s ease}
+.prog-meta{display:flex;justify-content:space-between;margin-top:6px}
+.prog-start{font-size:11px;color:var(--text3)}
+.prog-cur{font-size:11px;font-weight:600;color:var(--text2)}
+
+/* HISTORY */
+.hist-list{margin:0 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.hist-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.hist-row:last-child{border-bottom:none}
+.hist-date{font-size:14px;color:var(--text2);flex:1}
+.hist-kg{font-size:17px;font-weight:700}
+.hist-d{font-size:12px;font-weight:600;margin-left:10px;padding:3px 8px;border-radius:20px}
+.d-up{color:var(--red);background:var(--red-dim)}
+.d-dn{color:var(--green);background:var(--green-dim)}
+.empty{text-align:center;padding:36px 20px;color:var(--text3);font-size:14px;line-height:1.7}
+
+/* SUPPL */
+.suppl-g{margin:0 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.suppl-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.suppl-row:last-child{border-bottom:none}
+.s-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.s-name{font-size:14px;font-weight:600}
+.s-dose{font-size:12px;color:var(--text2);margin-top:2px}
+.s-time{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--bg4);color:var(--text3);white-space:nowrap}
+
+/* SKIN */
+.skin-g{margin:0 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.skin-row{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.skin-row:last-child{border-bottom:none}
+.sk-num{width:26px;height:26px;border-radius:50%;background:var(--blue-dim);color:var(--blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sk-name{font-size:14px;font-weight:600}
+.sk-detail{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.4}
+.sk-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;margin-top:5px}
+.t-am{background:rgba(255,204,0,.12);color:#ffcc00}
+.t-pm{background:rgba(100,100,255,.12);color:#9999ff}
+.t-warn{background:var(--red-dim);color:var(--red)}
+
+/* MODAL */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;padding-bottom:var(--safe-b)}
+#modal.open{display:flex}
+.modal-box{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;padding:20px 16px 16px;border-top:1px solid var(--border3)}
+.modal-lbl{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.modal-item{padding:14px 0;border-bottom:1px solid var(--border);font-size:15px;font-weight:500;cursor:pointer}
+.modal-item:last-child{border-bottom:none}
+.modal-cancel{width:100%;padding:14px;border:none;background:var(--bg3);border-radius:var(--r-sm);color:var(--text2);font-size:15px;font-weight:600;margin-top:12px;cursor:pointer}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(76px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg4);border:1px solid var(--border3);border-radius:20px;padding:10px 20px;font-size:14px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PR ANIMATION */
+@keyframes prPop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.pr-banner{animation:prPop .35s ease forwards}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="screens">
+
+<!-- ── TREENI ── -->
+<div class="screen active" id="s-treeni">
+  <div class="topbar">
+    <div style="flex:1">
+      <div class="topbar-title" id="hdr-title">Treeniohjelma</div>
+      <div class="topbar-sub" id="hdr-date"></div>
+    </div>
+  </div>
+  <div class="week-strip" id="week-strip"></div>
+  <div class="streak-row">
+    <div class="streak-box">
+      <div>
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-lbl">viikon streak 🔥</div>
+      </div>
+    </div>
+    <div class="vol-box">
+      <div class="vol-num" id="vol-num">0</div>
+      <div class="vol-lbl">sarjaa tällä viikolla</div>
+    </div>
+  </div>
+  <div class="day-wrap" id="day-list"></div>
+  <button class="finish-btn" id="finish-btn" onclick="finishWorkout()">Merkitse treeni valmiiksi ✓</button>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ── SEURANTA ── -->
+<div class="screen" id="s-seuranta">
+  <div class="topbar"><div class="topbar-title">Seuranta</div></div>
+  <div class="stats-2" id="stats-row"></div>
+  <div class="sec-title">Lisää paino</div>
+  <div class="w-form">
+    <input class="w-inp" id="w-inp" type="number" step="0.1" placeholder="75.5 kg" inputmode="decimal">
+    <button class="w-btn" onclick="saveWeight()">Tallenna</button>
+  </div>
+  <div class="sec-title">Painon kehitys</div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="chart-range">Viimeinen 8 viikkoa</div>
+    <canvas id="weight-chart"></canvas>
+  </div>
+  <div class="sec-title">Lihaskohtainen edistyminen</div>
+  <div class="prog-list" id="prog-list"></div>
+  <div class="sec-title">Historia</div>
+  <div class="hist-list" id="hist-list"></div>
+  <div style="height:24px"></div>
+</div>
+
+<!-- ── LISÄRAVINTEET ── -->
+<div class="screen" id="s-lisaravinteet">
+  <div class="topbar"><div class="topbar-title">Lisäravinteet</div></div>
+  <div class="sec-title">Aamu</div>
+  <div class="suppl-g">
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(255,204,0,.12)">☀️</div><div style="flex:1"><div class="s-name">D-vitamiini</div><div class="s-dose">50–100 mcg · immuunijärjestelmä & palautuminen</div></div><div class="s-time">Aamu</div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(52,199,89,.12)">💪</div><div style="flex:1"><div class="s-name">Kreatiinimonohydraatti</div><div class="s-dose">5g · sekoita veteen — voima & lihasmassa</div></div><div class="s-time">Aamu</div></div>
+  </div>
+  <div class="sec-title">Ennen treeniä</div>
+  <div class="suppl-g">
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(255,149,0,.12)">🍌</div><div style="flex:1"><div class="s-name">Banaani</div><div class="s-dose">30–60 min ennen · nopeat hiilihydraatit energiaan</div></div><div class="s-time">Pre-treeni</div></div>
+  </div>
+  <div class="sec-title">Treenin jälkeen</div>
+  <div class="suppl-g">
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(10,132,255,.12)">🥤</div><div style="flex:1"><div class="s-name">Heraproteiini</div><div class="s-dose">30–40g · lihasten palautuminen & kasvu</div></div><div class="s-time">Post-treeni</div></div>
+  </div>
+  <div class="sec-title">Ilta</div>
+  <div class="suppl-g">
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(175,82,222,.12)">🌙</div><div style="flex:1"><div class="s-name">Magnesium</div><div class="s-dose">300mg · uni & lihasten palautuminen</div></div><div class="s-time">Ilta</div></div>
+  </div>
+  <div class="sec-title">Päivittäin</div>
+  <div class="suppl-g" style="margin-bottom:24px">
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(255,107,107,.12)">🥩</div><div style="flex:1"><div class="s-name">Proteiini ruoasta</div><div class="s-dose">1.8–2g per painokilo per päivä</div></div><div class="s-time">Koko päivä</div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(77,166,255,.12)">💧</div><div style="flex:1"><div class="s-name">Vesi</div><div class="s-dose">2–3 litraa päivässä · enemmän treeniä</div></div><div class="s-time">Koko päivä</div></div>
+  </div>
+</div>
+
+<!-- ── IHO ── -->
+<div class="screen" id="s-iho">
+  <div class="topbar"><div class="topbar-title">Ihonhoito</div></div>
+  <div class="sec-title">Aamurutiini</div>
+  <div class="skin-g">
+    <div class="skin-row"><div class="sk-num">1</div><div><div class="sk-name">CeraVe Hydrating Cleanser</div><div class="sk-detail">Miedon, hajusteeton puhdistus</div><span class="sk-tag t-am">Aamu</span></div></div>
+    <div class="skin-row"><div class="sk-num">2</div><div><div class="sk-name">CeraVe Moisturizing Cream</div><div class="sk-detail">Kosteuttaja — akneinen iho tarvitsee kosteutta</div><span class="sk-tag t-am">Aamu</span></div></div>
+    <div class="skin-row"><div class="sk-num">3</div><div><div class="sk-name">CeraVe SPF 50</div><div class="sk-detail">Aurinkosuoja — tärkein askel pitkässä juoksussa</div><span class="sk-tag t-am">Aamu · älä ohita!</span></div></div>
+  </div>
+  <div class="sec-title">Iltarutiini</div>
+  <div class="skin-g">
+    <div class="skin-row"><div class="sk-num">1</div><div><div class="sk-name">CeraVe Hydrating Cleanser</div><div class="sk-detail">Sama puhdistus kuin aamulla</div><span class="sk-tag t-pm">Ilta</span></div></div>
+    <div class="skin-row"><div class="sk-num">2</div><div><div class="sk-name">The Ordinary Salicylic Acid 2%</div><div class="sk-detail">Eksfoliointi — puhdistaa huokosia, auttaa otsafinneihin</div><span class="sk-tag t-warn">Vain 1–2× viikossa</span></div></div>
+    <div class="skin-row"><div class="sk-num">3</div><div><div class="sk-name">CeraVe Moisturizing Cream</div><div class="sk-detail">Aina eksfolioinnin jälkeen</div><span class="sk-tag t-pm">Ilta</span></div></div>
+  </div>
+  <div class="sec-title">Muista</div>
+  <div class="skin-g" style="margin-bottom:24px">
+    <div class="skin-row"><div class="sk-num" style="background:var(--red-dim);color:var(--red)">!</div><div><div class="sk-name">Ei hajusteellisia tuotteita</div><div class="sk-detail">Vältä alkoholipitoisia tonereita ja liiallista kuorintaa</div></div></div>
+    <div class="skin-row"><div class="sk-num" style="background:var(--red-dim);color:var(--red)">!</div><div><div class="sk-name">Tarkista hiustenhoitotuotteet</div><div class="sk-detail">Konditionerit & öljyt voivat tukkia otsaa — huuhtele hyvin</div></div></div>
+  </div>
+</div>
+
+</div>
+
+<div id="navbar">
+  <button class="nb active" onclick="nav('treeni',this)">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16"/><circle cx="4" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+    Treeni
+  </button>
+  <button class="nb" onclick="nav('seuranta',this)">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Seuranta
+  </button>
+  <button class="nb" onclick="nav('lisaravinteet',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Ravinteet
+  </button>
+  <button class="nb" onclick="nav('iho',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Iho
+  </button>
+</div>
+</div>
+
+<div id="toast"></div>
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-lbl" id="modal-lbl">Vaihtoehdot</div>
+    <div id="modal-items"></div>
+    <button class="modal-cancel" onclick="closeModal()">Sulje</button>
+  </div>
+</div>
+<div id="summary">
+  <div class="sum-box">
+    <div class="sum-emoji">💪</div>
+    <div class="sum-title" id="sum-title">Treeni tehty!</div>
+    <div class="sum-sub" id="sum-sub"></div>
+    <div class="sum-grid" id="sum-grid"></div>
+    <button class="sum-close" onclick="closeSummary()">Jatka</button>
+  </div>
+</div>
+
+<script>
+const DAYS=[
+  {key:'ma',label:'Maanantai',short:'Ma',type:'Push 1',sub:'Rinta',color:'var(--push)',dim:'var(--push-dim)',
+   exercises:[
+    {name:'Bench Press (Barbell)',alts:['Dumbbell Bench Press','Smith Machine Press','Push Up'],sets:4,reps:'6–10'},
+    {name:'Incline Chest Fly (Dumbbell)',alts:['Cable Fly','Pec Deck Machine','Dumbbell Fly'],sets:3,reps:'12'},
+    {name:'Overhead Press (Dumbbell)',alts:['Barbell OHP','Arnold Press','Machine OHP'],sets:3,reps:'10'},
+    {name:'Lateral Raise (Dumbbell)',alts:['Cable Lateral Raise','Machine Lateral Raise'],sets:3,reps:'12–15'},
+    {name:'Tricep Pushdown (Cable)',alts:['Tricep Dip','Skull Crusher','Overhead Extension'],sets:3,reps:'12'},
+  ]},
+  {key:'ti',label:'Tiistai',short:'Ti',type:'Pull 1',sub:'Selkä',color:'var(--pull)',dim:'var(--pull-dim)',
+   exercises:[
+    {name:'Bent Over Row (Barbell)',alts:['Dumbbell Row','T-Bar Row','Pendlay Row'],sets:4,reps:'6–10'},
+    {name:'Lat Pulldown (Wide Grip)',alts:['Pull Up','Assisted Pull Up','Close Grip Pulldown'],sets:4,reps:'8–10'},
+    {name:'Cable Row',alts:['Dumbbell Row','Machine Row','Chest Supported Row'],sets:3,reps:'12'},
+    {name:'Face Pull (Cable)',alts:['Rear Delt Fly (Dumbbell)','Band Pull Apart'],sets:3,reps:'15'},
+    {name:'Bicep Curl (Dumbbell)',alts:['Barbell Curl','Cable Curl','Preacher Curl'],sets:3,reps:'10–12'},
+  ]},
+  {key:'ke',label:'Keskiviikko',short:'Ke',type:'Legs 1',sub:'Etureidet',color:'var(--legs)',dim:'var(--legs-dim)',
+   exercises:[
+    {name:'Squat (Barbell)',alts:['Leg Press','Goblet Squat','Smith Machine Squat'],sets:4,reps:'6–10'},
+    {name:'Lunge (Dumbbell)',alts:['Bulgarian Split Squat','Step Up','Reverse Lunge'],sets:3,reps:'12/jalka'},
+    {name:'Leg Extension',alts:['Hack Squat','Sissy Squat','Wall Sit'],sets:3,reps:'12–15'},
+    {name:'Calf Raise',alts:['Seated Calf Raise','Leg Press Calf Raise'],sets:4,reps:'15–20'},
+    {name:'Plank',alts:['Dead Bug','Ab Wheel Rollout','Hollow Body Hold'],sets:3,reps:'40 sek'},
+  ]},
+  {key:'to',label:'Torstai',short:'To',type:'Push 2',sub:'Hartiat',color:'var(--push)',dim:'var(--push-dim)',
+   exercises:[
+    {name:'Overhead Press (Barbell)',alts:['Seated Dumbbell Press','Arnold Press','Machine OHP'],sets:4,reps:'6–10'},
+    {name:'Incline Bench Press (Dumbbell)',alts:['Incline Barbell Press','Cable Incline Fly'],sets:3,reps:'10'},
+    {name:'Lateral Raise (Cable)',alts:['Dumbbell Lateral Raise','Machine Lateral Raise'],sets:3,reps:'12–15'},
+    {name:'Front Raise (Dumbbell)',alts:['Cable Front Raise','Plate Front Raise'],sets:3,reps:'12'},
+    {name:'Tricep Kickback (Dumbbell)',alts:['Skull Crusher','Overhead Tricep Extension'],sets:3,reps:'12'},
+  ]},
+  {key:'pe',label:'Perjantai',short:'Pe',type:'Pull 2',sub:'Hauikset',color:'var(--pull)',dim:'var(--pull-dim)',
+   exercises:[
+    {name:'Lat Pulldown (Narrow Grip)',alts:['Seated Cable Row','Close Grip Pull Up'],sets:4,reps:'8–10'},
+    {name:'Dumbbell Row',alts:['T-Bar Row','Machine Row','Chest Supported Row'],sets:3,reps:'10–12'},
+    {name:'Straight Arm Pulldown',alts:['Cable Pullover','Dumbbell Pullover'],sets:3,reps:'12–15'},
+    {name:'Hammer Curl (Dumbbell)',alts:['Rope Hammer Curl','Cross Body Curl'],sets:3,reps:'10–12'},
+    {name:'Bicep Curl (Cable)',alts:['Concentration Curl','Machine Curl','Preacher Curl'],sets:3,reps:'12'},
+  ]},
+  {key:'la',label:'Lauantai',short:'La',type:'Legs 2',sub:'Takareidet',color:'var(--legs)',dim:'var(--legs-dim)',
+   exercises:[
+    {name:'Romanian Deadlift',alts:['Stiff Leg Deadlift','Good Morning','Cable Pull Through'],sets:4,reps:'8–10'},
+    {name:'Leg Curl',alts:['Nordic Curl','Swiss Ball Leg Curl','Cable Leg Curl'],sets:3,reps:'12'},
+    {name:'Bulgarian Split Squat',alts:['Reverse Lunge','Step Up','Single Leg Press'],sets:3,reps:'10/jalka'},
+    {name:'Calf Raise (Seated)',alts:['Standing Calf Raise','Donkey Calf Raise'],sets:3,reps:'15–20'},
+    {name:'Crunch',alts:['Hanging Knee Raise','Cable Crunch','Bicycle Crunch'],sets:3,reps:'15–20'},
+  ]},
+];
+
+// Key exercises to track progress for
+const TRACK_EXERCISES=[
+  {name:'Bench Press (Barbell)',label:'Penkki',color:'var(--push)'},
+  {name:'Bent Over Row (Barbell)',label:'Soutu',color:'var(--pull)'},
+  {name:'Squat (Barbell)',label:'Kyykky',color:'var(--legs)'},
+  {name:'Overhead Press (Barbell)',label:'Pystypunnerrus',color:'var(--push)'},
+  {name:'Romanian Deadlift',label:'Romanian DL',color:'var(--legs)'},
+  {name:'Lat Pulldown (Wide Grip)',label:'Latasoutu',color:'var(--pull)'},
+];
+
+const DN=['su','ma','ti','ke','to','pe','la'];
+const todayKey=DN[new Date().getDay()];
+function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let wData=ld('wd4',{});
+let wLog=ld('wl4',[]);
+let openDays=ld('od4',[todayKey]);
+let completedDays=ld('cd4',[]);
+// Track best lifts: {exerciseName: [{date, kg, reps}]}
+let liftHistory=ld('lh4',{});
+
+// HAPTIC
+function haptic(style){
+  if(navigator.vibrate){
+    if(style==='light')navigator.vibrate(10);
+    else if(style==='medium')navigator.vibrate(20);
+    else if(style==='success')navigator.vibrate([15,10,30]);
+    else if(style==='pr')navigator.vibrate([20,15,20,15,60]);
+  }
+  if(window.webkit&&window.webkit.messageHandlers){
+    try{window.webkit.messageHandlers.haptic&&window.webkit.messageHandlers.haptic.postMessage(style)}catch(e){}
+  }
+}
+
+// NAV with swipe
+let touchStartX=0,touchStartY=0;
+const screenOrder=['treeni','seuranta','lisaravinteet','iho'];
+let currentScreen=0;
+
+document.getElementById('screens').addEventListener('touchstart',e=>{
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+},{passive:true});
+
+document.getElementById('screens').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*2){
+    if(dx<0&&currentScreen<screenOrder.length-1){
+      const next=screenOrder[currentScreen+1];
+      const btn=document.querySelectorAll('.nb')[currentScreen+1];
+      nav(next,btn);
+    } else if(dx>0&&currentScreen>0){
+      const prev=screenOrder[currentScreen-1];
+      const btn=document.querySelectorAll('.nb')[currentScreen-1];
+      nav(prev,btn);
+    }
+  }
+},{passive:true});
+
+function nav(name,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  btn.classList.add('active');
+  currentScreen=screenOrder.indexOf(name);
+  haptic('light');
+  if(name==='seuranta')renderSeuranta();
+}
+
+// BUILD
+function buildDays(){
+  const now=new Date();
+  const ds=now.toLocaleDateString('fi-FI',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('hdr-title').textContent=ds.charAt(0).toUpperCase()+ds.slice(1);
+  buildWeekStrip();
+  buildStreakVol();
+  const container=document.getElementById('day-list');
+  container.innerHTML='';
+
+  DAYS.forEach(day=>{
+    const isToday=day.key===todayKey;
+    const isOpen=openDays.includes(day.key);
+    const isDone=completedDays.includes(day.key+'-'+getWeekId());
+    const doneCount=countDone(day.key);
+    const totalSets=day.exercises.reduce((a,e)=>a+e.sets+(wData[day.key+'_'+DAYS.indexOf(day)]?.extraSets||0),0);
+
+    const card=document.createElement('div');
+    card.className='day-card'+(isToday?' today':'');
+    card.id='dc-'+day.key;
+
+    let pills='';
+    if(isToday) pills+=`<div class="pill" style="background:${day.dim};color:${day.color}">Tänään</div>`;
+    if(isDone) pills+=`<div class="pill" style="background:var(--green-dim);color:var(--green);margin-left:6px">✓ Tehty</div>`;
+    else if(doneCount>0) pills+=`<div class="pill" style="background:var(--bg3);color:var(--text2);margin-left:6px">${doneCount}/${totalSets}</div>`;
+
+    card.innerHTML=`
+      <div class="day-top" onclick="toggleDay('${day.key}')">
+        <div class="day-dot" style="background:${day.color}"></div>
+        <div class="day-info">
+          <div class="day-name">${day.label}</div>
+          <div class="day-type">${day.type} · ${day.sub}</div>
+        </div>
+        ${pills}
+        <div class="day-chevron${isOpen?' open':''}" id="chev-${day.key}">▶</div>
+      </div>
+      <div class="day-body${isOpen?' open':''}" id="db-${day.key}">
+        ${day.exercises.map((ex,ei)=>buildExHTML(day.key,ex,ei)).join('')}
+      </div>`;
+    container.appendChild(card);
+  });
+
+  const fb=document.getElementById('finish-btn');
+  fb.style.display=openDays.includes(todayKey)?'block':'none';
+}
+
+function buildWeekStrip(){
+  const strip=document.getElementById('week-strip');
+  strip.innerHTML='';
+  DAYS.forEach(day=>{
+    const isToday=day.key===todayKey;
+    const isDone=completedDays.includes(day.key+'-'+getWeekId());
+    const div=document.createElement('div');
+    div.className='wday'+(isToday?' today':'')+(isDone?' done':'');
+    div.onclick=()=>{haptic('light');scrollToDay(day.key);};
+    div.innerHTML=`<div class="wday-lbl">${day.short}</div><div class="wday-dot"></div><div class="wday-type">${day.type.split(' ')[0]}</div>`;
+    strip.appendChild(div);
+  });
+}
+
+function buildStreakVol(){
+  const wid=getWeekId();
+  let streak=0;
+  for(let w=wid;w>=wid-20;w--){
+    const done=DAYS.filter(d=>completedDays.includes(d.key+'-'+w)).length;
+    if(done>=4)streak++;else break;
+  }
+  document.getElementById('streak-num').textContent=streak;
+  let vol=0;
+  DAYS.forEach(day=>{
+    Object.keys(wData).filter(k=>k.startsWith(day.key+'_')).forEach(k=>{
+      vol+=Object.keys(wData[k]).filter(f=>f.startsWith('done')&&wData[k][f]).length;
+    });
+  });
+  document.getElementById('vol-num').textContent=vol;
+}
+
+function scrollToDay(key){
+  if(!openDays.includes(key))toggleDay(key);
+  setTimeout(()=>{
+    const el=document.getElementById('dc-'+key);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },60);
+}
+
+function getWeekId(){
+  const d=new Date(),jan1=new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+}
+
+function buildExHTML(dayKey,ex,ei){
+  const exKey=`${dayKey}_${ei}`;
+  const saved=wData[exKey]||{};
+  const totalSets=ex.sets+(saved.extraSets||0);
+
+  const rows=Array.from({length:totalSets},(_,si)=>{
+    const kg=saved[`kg${si}`]||'';
+    const rp=saved[`rp${si}`]||'';
+    const done=saved[`done${si}`]||false;
+    const prevKg=saved[`prevkg${si}`]||'';
+    const prevRp=saved[`prevrp${si}`]||'';
+    const prevStr=prevKg&&prevRp?`${prevKg}×${prevRp}`:(si<ex.sets?ex.reps:'–');
+    return `<div class="set-row">
+      <div class="set-num">${si+1}</div>
+      <div class="set-prev">${prevStr}</div>
+      <input class="set-inp${done?' done':''}" id="kg-${exKey}-${si}" type="number" inputmode="decimal" placeholder="kg" value="${kg}" onchange="setVal('${exKey}',${si},'kg',this.value)">
+      <input class="set-inp${done?' done':''}" id="rp-${exKey}-${si}" type="number" inputmode="numeric" placeholder="toistot" value="${rp}" onchange="setVal('${exKey}',${si},'rp',this.value)">
+      <button class="check-btn${done?' done':''}" id="cb-${exKey}-${si}" onclick="toggleDone('${exKey}',${si},'${dayKey}','${ex.name}')">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+
+  const showPR=saved.showPR||false;
+  const prHTML=showPR?`<div class="pr-banner"><span style="font-size:16px">🏆</span><div class="pr-text">Uusi henkilökohtainen ennätys!</div></div>`:'';
+
+  return `<div class="ex-block" id="eb-${exKey}">
+    <div class="ex-header">
+      <div class="ex-name">${ex.name}</div>
+      <button class="ex-btn" onclick="showAlts(${JSON.stringify(ex.name)},${JSON.stringify(ex.alts)})">Vaihtoehto</button>
+    </div>
+    ${prHTML}
+    <div class="set-table">
+      <div class="set-thead"><span>Set</span><span>Edellinen</span><span>kg</span><span>Toistot</span><span></span></div>
+      <div id="sets-${exKey}">${rows}</div>
+    </div>
+    <button class="add-set-btn" onclick="addSet('${dayKey}',${ei})">+ Lisää sarja</button>
+  </div>`;
+}
+
+function toggleDay(key){
+  const body=document.getElementById('db-'+key);
+  const chev=document.getElementById('chev-'+key);
+  if(!body)return;
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  chev.classList.toggle('open',!isOpen);
+  openDays=isOpen?openDays.filter(k=>k!==key):[...openDays,key];
+  sv('od4',openDays);
+  document.getElementById('finish-btn').style.display=openDays.includes(todayKey)?'block':'none';
+  haptic('light');
+}
+
+function setVal(exKey,si,field,val){
+  if(!wData[exKey])wData[exKey]={};
+  wData[exKey][`${field}${si}`]=val;
+  sv('wd4',wData);
+}
+
+function toggleDone(exKey,si,dayKey,exName){
+  if(!wData[exKey])wData[exKey]={};
+  const done=!wData[exKey][`done${si}`];
+  wData[exKey][`done${si}`]=done;
+
+  if(done){
+    haptic('medium');
+    const kg=parseFloat(wData[exKey][`kg${si}`]||0);
+    const rp=parseFloat(wData[exKey][`rp${si}`]||0);
+    if(kg&&rp){
+      // Check PR
+      const prevKg=parseFloat(wData[exKey][`prevkg${si}`]||0);
+      const prevRp=parseFloat(wData[exKey][`prevrp${si}`]||0);
+      const isPR=kg*rp>prevKg*prevRp&&prevKg>0;
+      if(isPR){
+        wData[exKey].showPR=true;
+        haptic('pr');
+        toast('🏆 Uusi ennätys!');
+      }
+      // Save to lift history
+      if(!liftHistory[exName])liftHistory[exName]=[];
+      const today=new Date().toLocaleDateString('fi-FI');
+      const existing=liftHistory[exName].findIndex(e=>e.date===today);
+      if(existing>=0){
+        if(kg>liftHistory[exName][existing].kg)liftHistory[exName][existing]={date:today,kg,rp};
+      } else {
+        liftHistory[exName].push({date:today,kg,rp});
+      }
+      if(liftHistory[exName].length>52)liftHistory[exName]=liftHistory[exName].slice(-52);
+      sv('lh4',liftHistory);
+      // Save prev best
+      wData[exKey][`prevkg${si}`]=wData[exKey][`kg${si}`];
+      wData[exKey][`prevrp${si}`]=wData[exKey][`rp${si}`];
+    }
+  } else {
+    haptic('light');
+    wData[exKey].showPR=false;
+  }
+  sv('wd4',wData);
+
+  const cb=document.getElementById(`cb-${exKey}-${si}`);
+  const kgI=document.getElementById(`kg-${exKey}-${si}`);
+  const rpI=document.getElementById(`rp-${exKey}-${si}`);
+  if(cb)cb.classList.toggle('done',done);
+  if(kgI)kgI.classList.toggle('done',done);
+  if(rpI)rpI.classList.toggle('done',done);
+  if(wData[exKey].showPR){
+    const eb=document.getElementById('eb-'+exKey);
+    if(eb){
+      const day=DAYS.find(d=>d.key===dayKey);
+      const ei=parseInt(exKey.split('_')[1]);
+      if(day)eb.outerHTML=buildExHTML(dayKey,day.exercises[ei],ei);
+    }
+  }
+  updateDayPill(dayKey);
+  buildStreakVol();
+}
+
+function addSet(dayKey,ei){
+  const exKey=`${dayKey}_${ei}`;
+  if(!wData[exKey])wData[exKey]={};
+  wData[exKey].extraSets=(wData[exKey].extraSets||0)+1;
+  sv('wd4',wData);
+  haptic('light');
+  const day=DAYS.find(d=>d.key===dayKey);
+  if(day){
+    const eb=document.getElementById('eb-'+exKey);
+    if(eb)eb.outerHTML=buildExHTML(dayKey,day.exercises[ei],ei);
+  }
+}
+
+function countDone(dayKey){
+  let n=0;
+  Object.keys(wData).filter(k=>k.startsWith(dayKey+'_')).forEach(k=>{
+    n+=Object.keys(wData[k]).filter(f=>f.startsWith('done')&&wData[k][f]).length;
+  });
+  return n;
+}
+
+function updateDayPill(dayKey){
+  const day=DAYS.find(d=>d.key===dayKey);if(!day)return;
+  const isToday=dayKey===todayKey;
+  const isDone=completedDays.includes(dayKey+'-'+getWeekId());
+  const doneCount=countDone(dayKey);
+  const totalSets=day.exercises.reduce((a,e)=>a+e.sets,0);
+  const card=document.getElementById('dc-'+dayKey);if(!card)return;
+  const top=card.querySelector('.day-top');
+  top.querySelectorAll('.pill').forEach(p=>p.remove());
+  const chev=top.querySelector('.day-chevron');
+  if(isToday){const p=document.createElement('div');p.className='pill';p.style.cssText=`background:${day.dim};color:${day.color}`;p.textContent='Tänään';top.insertBefore(p,chev);}
+  if(isDone){const p=document.createElement('div');p.className='pill';p.style.cssText='background:var(--green-dim);color:var(--green);margin-left:6px';p.textContent='✓ Tehty';top.insertBefore(p,chev);}
+  else if(doneCount>0){const p=document.createElement('div');p.className='pill';p.style.cssText='background:var(--bg3);color:var(--text2);margin-left:6px';p.textContent=`${doneCount}/${totalSets}`;top.insertBefore(p,chev);}
+}
+
+function finishWorkout(){
+  const id=todayKey+'-'+getWeekId();
+  if(!completedDays.includes(id))completedDays.push(id);
+  sv('cd4',completedDays);
+  haptic('success');
+
+  const doneCount=countDone(todayKey);
+  const day=DAYS.find(d=>d.key===todayKey);
+  let totalVol=0;
+  if(day){
+    day.exercises.forEach((_,ei)=>{
+      const exKey=`${todayKey}_${ei}`;
+      const saved=wData[exKey]||{};
+      for(let s=0;s<10;s++){
+        const kg=parseFloat(saved[`kg${s}`]||0);
+        const rp=parseFloat(saved[`rp${s}`]||0);
+        if(saved[`done${s}`]&&kg&&rp)totalVol+=kg*rp;
+      }
+    });
+  }
+
+  document.getElementById('sum-title').textContent=`${day?day.label:''} tehty! 💪`;
+  document.getElementById('sum-sub').textContent='Hyvää työtä — syö proteiinia ja palaudu hyvin!';
+  document.getElementById('sum-grid').innerHTML=`
+    <div class="sg"><div class="sg-val">${day?day.exercises.length:0}</div><div class="sg-lbl">liikettä</div></div>
+    <div class="sg"><div class="sg-val">${doneCount}</div><div class="sg-lbl">sarjaa</div></div>
+    <div class="sg"><div class="sg-val">${Math.round(totalVol)}</div><div class="sg-lbl">kg nostettu</div></div>`;
+  document.getElementById('summary').classList.add('open');
+  buildDays();
+}
+function closeSummary(){document.getElementById('summary').classList.remove('open');}
+
+// WEIGHT
+function saveWeight(){
+  const inp=document.getElementById('w-inp');
+  const val=parseFloat(inp.value);
+  if(!val||val<20||val>300){toast('Syötä kelvollinen paino');return;}
+  const today=new Date().toLocaleDateString('fi-FI');
+  const idx=wLog.findIndex(w=>w.date===today);
+  if(idx>=0)wLog[idx].weight=val;
+  else wLog.unshift({date:today,weight:val});
+  if(wLog.length>52)wLog=wLog.slice(0,52);
+  sv('wl4',wLog);
+  inp.value='';
+  haptic('medium');
+  renderSeuranta();
+  toast('Paino tallennettu!');
+}
+
+function renderSeuranta(){
+  const cur=wLog[0],prev=wLog[1];
+  const delta=cur&&prev?(cur.weight-prev.weight):null;
+  const totalW=completedDays.length;
+
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-box">
+      <div class="stat-lbl">Nykyinen paino</div>
+      <div class="stat-val">${cur?cur.weight:'—'}<span class="stat-unit"> kg</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-lbl">Muutos</div>
+      <div class="stat-val" style="color:${delta===null?'var(--text3)':delta>0?'var(--red)':'var(--green)'}">
+        ${delta===null?'—':(delta>0?'+':'')+delta.toFixed(1)}<span class="stat-unit"> kg</span>
+      </div>
+    </div>`;
+
+  drawWeightChart();
+  renderProgress();
+  renderHistory();
+}
+
+function drawWeightChart(){
+  const canvas=document.getElementById('weight-chart');
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-32;
+  const H=140;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+
+  const data=wLog.slice(0,12).reverse();
+  if(data.length<2){
+    ctx.fillStyle='#555';ctx.font='13px -apple-system,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('Lisää vähintään 2 painokirjausta nähdäksesi kaavion',W/2,H/2);
+    return;
+  }
+
+  const vals=data.map(d=>d.weight);
+  const minV=Math.min(...vals)-1,maxV=Math.max(...vals)+1;
+  const pad={t:10,r:10,b:28,l:36};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+
+  const toX=i=>pad.l+i*(cW/(data.length-1));
+  const toY=v=>pad.t+cH-(v-minV)/(maxV-minV)*cH;
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+i*(cH/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+  }
+
+  // Y axis labels
+  ctx.fillStyle='#555';ctx.font=`10px -apple-system,sans-serif`;ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const v=minV+(maxV-minV)*(1-i/4);
+    const y=pad.t+i*(cH/4);
+    ctx.fillText(v.toFixed(1),pad.l-4,y+4);
+  }
+
+  // Fill area
+  ctx.beginPath();
+  ctx.moveTo(toX(0),toY(vals[0]));
+  for(let i=1;i<data.length;i++)ctx.lineTo(toX(i),toY(vals[i]));
+  ctx.lineTo(toX(data.length-1),pad.t+cH);
+  ctx.lineTo(toX(0),pad.t+cH);ctx.closePath();
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,'rgba(10,132,255,.3)');
+  grad.addColorStop(1,'rgba(10,132,255,.02)');
+  ctx.fillStyle=grad;ctx.fill();
+
+  // Line
+  ctx.beginPath();ctx.strokeStyle='#0a84ff';ctx.lineWidth=2;ctx.lineJoin='round';
+  data.forEach((d,i)=>{
+    if(i===0)ctx.moveTo(toX(i),toY(d.weight));
+    else ctx.lineTo(toX(i),toY(d.weight));
+  });
+  ctx.stroke();
+
+  // Dots + x labels
+  data.forEach((d,i)=>{
+    ctx.beginPath();ctx.arc(toX(i),toY(d.weight),3.5,0,Math.PI*2);
+    ctx.fillStyle='#0a84ff';ctx.fill();
+    if(i===0||i===data.length-1||(data.length<=6)){
+      const parts=d.date.split('.');
+      const lbl=parts[0]+'.'+parts[1];
+      ctx.fillStyle='#555';ctx.font='9px -apple-system,sans-serif';ctx.textAlign='center';
+      ctx.fillText(lbl,toX(i),H-6);
+    }
+  });
+
+  // Range label
+  document.getElementById('chart-range').textContent=`Viimeiset ${data.length} kirjausta`;
+}
+
+function renderProgress(){
+  const list=document.getElementById('prog-list');
+  const items=TRACK_EXERCISES.map(te=>{
+    const hist=liftHistory[te.name]||[];
+    if(hist.length<1)return null;
+    const first=hist[0];
+    const last=hist[hist.length-1];
+    const gain=last.kg-first.kg;
+    const pct=first.kg>0?Math.min((last.kg/first.kg)*100,100):0;
+    return {te,first,last,gain,pct};
+  }).filter(Boolean);
+
+  if(!items.length){
+    list.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;color:var(--text3);font-size:14px;line-height:1.7">Merkitse sarjoja tehdyiksi niin näet<br>lihaskohtaisen edistymisesi täällä.</div>`;
+    return;
+  }
+
+  list.innerHTML=items.map(({te,first,last,gain,pct})=>`
+    <div class="prog-card">
+      <div class="prog-header">
+        <div class="prog-name">${te.label}</div>
+        <div class="prog-gain" style="background:${gain>=0?'var(--green-dim)':'var(--red-dim)'};color:${gain>=0?'var(--green)':'var(--red)'}">
+          ${gain>=0?'+':''}${gain.toFixed(1)} kg
+        </div>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%;background:${te.color}"></div></div>
+      <div class="prog-meta">
+        <div class="prog-start">Alku: ${first.kg} kg × ${first.rp}</div>
+        <div class="prog-cur">Nyt: ${last.kg} kg × ${last.rp}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderHistory(){
+  const list=document.getElementById('hist-list');
+  if(!wLog.length){list.innerHTML='<div class="empty">Ei kirjauksia vielä.<br>Lisää ensimmäinen painosi!</div>';return;}
+  list.innerHTML=wLog.slice(0,20).map((w,i)=>{
+    const p=wLog[i+1];const d=p?(w.weight-p.weight):null;
+    const cls=d===null?'':d>0?'d-up':'d-dn';
+    return `<div class="hist-row">
+      <div class="hist-date">${w.date}</div>
+      <div class="hist-kg">${w.weight} kg</div>
+      <div class="hist-d ${cls}">${d!==null?(d>0?'+':'')+d.toFixed(1)+' kg':'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// MODAL
+function showAlts(name,alts){
+  document.getElementById('modal-lbl').textContent=name;
+  document.getElementById('modal-items').innerHTML=alts.map(a=>`<div class="modal-item">${a}</div>`).join('');
+  document.getElementById('modal').classList.add('open');
+  haptic('light');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+document.getElementById('summary').addEventListener('click',e=>{if(e.target===document.getElementById('summary'))closeSummary();});
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+buildDays();
+renderSeuranta();
+</script>
+</body>
+</html>
