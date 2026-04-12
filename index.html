@@ -47,7 +47,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .nb.active svg{stroke:var(--blue)}
 
 /* WEEK STRIP */
-.week-strip{padding:14px 16px 0;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.week-strip{padding:14px 16px 0;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .wday{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
 .wday.today{border-color:var(--blue)}
 .wday.done{background:var(--green-dim);border-color:rgba(52,199,89,.4)}
@@ -58,6 +58,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .wday.done .wday-dot{background:var(--green)}
 .wday.today:not(.done) .wday-dot{background:var(--blue)}
 .wday-type{font-size:8px;color:var(--text3);font-weight:700}
+.wday-lbl{font-size:9px}
+.empty-day-msg{padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--text3)}
+.empty-day-msg span{font-size:14px;font-weight:600}
+.empty-day-msg button{font-size:13px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:none;border-radius:var(--r-sm);padding:8px 16px;cursor:pointer;font-family:inherit}
 
 /* STREAK */
 .streak-row{display:flex;gap:10px;padding:12px 16px 0}
@@ -116,9 +120,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;position:relative;transition:all .15s}
 .cal-day.empty{cursor:default}
 .cal-day.today{background:var(--blue);color:#fff;font-weight:800}
-.cal-day.has-workout{color:var(--text)}
-.cal-day.has-workout::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--blue)}
-.cal-day.today::after{background:#fff}
+.cal-day.has-workout{background:var(--green);color:#fff;font-weight:800}
+.cal-day.has-workout::after{display:none}
+.cal-day.today.has-workout{background:var(--blue)}
+.cal-day.today::after{display:none}
 .cal-day.other-month{color:var(--text3)}
 .cal-day:active:not(.empty){background:var(--bg4)}
 .cal-day-detail{margin:12px 16px 0;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;display:none;box-shadow:var(--shadow)}
@@ -432,6 +437,8 @@ const DEFAULT_DAYS=[
     {name:'Calf Raise (Seated)',alts:['Standing Calf Raise'],sets:3,reps:'15–20'},
     {name:'Crunch',alts:['Hanging Knee Raise','Cable Crunch'],sets:3,reps:'15–20'},
   ]},
+  {key:'su',label:'Sunnuntai',short:'Su',type:'Lepo',sub:'Vapaa / Lisätreeni',color:'#8E8E93',dim:'rgba(142,142,147,.12)',
+   exercises:[]},
 ];
 
 const TRACK_EX=[
@@ -450,6 +457,11 @@ function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}ca
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 
 let DAYS=ld('days5',DEFAULT_DAYS);
+// Migraatio: lisää sunnuntai jos puuttuu
+if(!DAYS.find(d=>d.key==='su')){
+  DAYS.push({key:'su',label:'Sunnuntai',short:'Su',type:'Lepo',sub:'Vapaa / Lisätreeni',color:'#8E8E93',dim:'rgba(142,142,147,.12)',exercises:[]});
+  sv('days5',DAYS);
+}
 let wData=ld('wd5',{});
 let wLog=ld('wl5',[]);
 let openDays=ld('od5',[todayKey]);
@@ -521,11 +533,15 @@ function buildDays(){
         <div class="day-chevron${isOpen?' open':''}" id="chev-${day.key}">▶</div>
       </div>
       <div class="day-body${isOpen?' open':''}" id="db-${day.key}">
-        ${day.exercises.map((ex,ei)=>buildExHTML(day.key,ex,ei)).join('')}
+        ${day.exercises.length>0
+          ? day.exercises.map((ex,ei)=>buildExHTML(day.key,ex,ei)).join('')
+          : `<div class="empty-day-msg"><span>Ei liikkeitä</span><button onclick="nav('muokkaa',document.querySelectorAll('.nb')[3])">Lisää Muokkaa-osiossa →</button></div>`}
       </div>`;
     container.appendChild(card);
   });
-  document.getElementById('finish-btn').style.display=openDays.includes(todayKey)?'block':'none';
+  const todayDay=DAYS.find(d=>d.key===todayKey);
+  const hasExercises=todayDay&&todayDay.exercises.length>0;
+  document.getElementById('finish-btn').style.display=(openDays.includes(todayKey)&&hasExercises)?'block':'none';
 }
 
 function buildWeekStrip(){
@@ -615,7 +631,8 @@ function toggleDay(key){
   body.classList.toggle('open',!isOpen);chev.classList.toggle('open',!isOpen);
   openDays=isOpen?openDays.filter(k=>k!==key):[...openDays,key];
   sv('od5',openDays);
-  document.getElementById('finish-btn').style.display=openDays.includes(todayKey)?'block':'none';
+  const _td=DAYS.find(d=>d.key===todayKey);
+  document.getElementById('finish-btn').style.display=(openDays.includes(todayKey)&&_td&&_td.exercises.length>0)?'block':'none';
   haptic('light');
 }
 
@@ -1054,4 +1071,3 @@ renderCalendar();
 </script>
 </body>
 </html>
-
