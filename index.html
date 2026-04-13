@@ -24,6 +24,7 @@
   --push:#E53935;--push-dim:rgba(229,57,53,.1);
   --pull:#FF7043;--pull-dim:rgba(255,112,67,.1);
   --legs:#43A047;--legs-dim:rgba(67,160,71,.1);
+  --rest:#8E8E93;--rest-dim:rgba(142,142,147,.12);
   --r:14px;--r-sm:10px;--r-xs:8px;
   --safe-t:env(safe-area-inset-top,44px);
   --safe-b:env(safe-area-inset-bottom,20px);
@@ -37,7 +38,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .topbar{padding:16px 16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:linear-gradient(135deg,#E53935 0%,#FF7043 100%);z-index:20}
 .topbar-title{font-size:22px;font-weight:800;flex:1;letter-spacing:-.3px;color:#fff}
 .topbar-sub{font-size:13px;color:rgba(255,255,255,.75);margin-top:2px}
-.icon-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 
 /* NAVBAR */
 #navbar{display:flex;background:#fff;border-top:1px solid var(--border);padding-bottom:var(--safe-b);flex-shrink:0;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
@@ -51,14 +51,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .wday{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
 .wday.today{border-color:var(--blue)}
 .wday.done{background:var(--green-dim);border-color:rgba(52,199,89,.4)}
-.wday-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--text3)}
+.wday-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--text3)}
 .wday.today .wday-lbl{color:var(--blue)}
 .wday.done .wday-lbl{color:var(--green)}
 .wday-dot{width:5px;height:5px;border-radius:50%;background:var(--border3)}
 .wday.done .wday-dot{background:var(--green)}
 .wday.today:not(.done) .wday-dot{background:var(--blue)}
 .wday-type{font-size:8px;color:var(--text3);font-weight:700}
-.wday-lbl{font-size:9px}
 .empty-day-msg{padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--text3)}
 .empty-day-msg span{font-size:14px;font-weight:600}
 .empty-day-msg button{font-size:13px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:none;border-radius:var(--r-sm);padding:8px 16px;cursor:pointer;font-family:inherit}
@@ -116,16 +115,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 .cal-month{font-size:17px;font-weight:800;flex:1}
 .cal-nav{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;padding:12px 16px 0}
-.cal-dow{font-size:10px;font-weight:800;color:var(--text3);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.3px;min-width:0;overflow:hidden}
-.cal-day{display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;position:relative;transition:all .15s;min-width:0;overflow:hidden;padding-top:calc(100% - 0px);height:0;}
+.cal-dow{font-size:10px;font-weight:800;color:var(--text3);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.3px}
+.cal-day{display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;position:relative;transition:all .15s;aspect-ratio:1}
 .cal-day.empty{cursor:default}
 .cal-day.today{background:var(--blue);color:#fff;font-weight:800}
 .cal-day.has-workout{background:var(--green);color:#fff;font-weight:800}
-.cal-day.has-workout::after{display:none}
 .cal-day.today.has-workout{background:var(--blue)}
-.cal-day.today::after{display:none}
 .cal-day.other-month{color:var(--text3)}
-.cal-day:active:not(.empty){background:var(--bg4)}
+.cal-day:active:not(.empty){opacity:.7}
 .cal-day-detail{margin:12px 16px 0;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;display:none;box-shadow:var(--shadow)}
 .cal-day-detail.open{display:block}
 .cal-detail-header{padding:14px 16px;border-bottom:1px solid var(--border)}
@@ -280,24 +277,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
   </div>
   <div class="week-strip" id="week-strip"></div>
   <div class="streak-row">
-    <div class="streak-box"><div><div class="streak-num" id="streak-num">0</div><div class="streak-lbl">viikon streak 🔥</div></div></div>
-    <div class="vol-box"><div class="vol-num" id="vol-num">0</div><div class="vol-lbl">sarjaa tällä viikolla</div></div>
+    <div class="streak-box"><div><div class="streak-num" id="streak-num">0</div><div class="streak-lbl">viikon streak ðŸ”¥</div></div></div>
+    <div class="vol-box"><div class="vol-num" id="vol-num">0</div><div class="vol-lbl">sarjaa tÃ¤llÃ¤ viikolla</div></div>
   </div>
   <div class="day-wrap" id="day-list"></div>
-  <button class="finish-btn" id="finish-btn" onclick="finishWorkout()">Merkitse treeni valmiiksi ✓</button>
+  <button class="finish-btn" id="finish-btn" onclick="finishWorkout()">Merkitse treeni valmiiksi âœ“</button>
   <div style="height:16px"></div>
 </div>
 
 <!-- KALENTERI -->
 <div class="screen" id="s-kalenteri">
-  <div class="topbar">
-    <div style="flex:1"><div class="topbar-title">Historia</div></div>
-  </div>
+  <div class="topbar"><div style="flex:1"><div class="topbar-title">Historia</div></div></div>
   <div style="padding:14px 0 0">
     <div class="cal-header">
-      <button class="cal-nav" onclick="calPrev()">‹</button>
+      <button class="cal-nav" onclick="calPrev()">â€¹</button>
       <div class="cal-month" id="cal-month"></div>
-      <button class="cal-nav" onclick="calNext()">›</button>
+      <button class="cal-nav" onclick="calNext()">â€º</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
     <div class="cal-day-detail" id="cal-detail">
@@ -315,13 +310,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 <div class="screen" id="s-seuranta">
   <div class="topbar"><div class="topbar-title">Seuranta</div></div>
   <div class="stats-2" id="stats-row"></div>
-  <div class="sec-title">Lisää paino</div>
+  <div class="sec-title">LisÃ¤Ã¤ paino</div>
   <div class="w-form">
     <input class="w-inp" id="w-inp" type="number" step="0.1" placeholder="75.5 kg" inputmode="decimal">
     <button class="w-btn" onclick="saveWeight()">Tallenna</button>
   </div>
   <div class="sec-title">Painon kehitys</div>
-  <div class="chart-wrap"><div class="chart-lbl" id="chart-lbl">—</div><canvas id="wchart" style="width:100%;height:140px;display:block"></canvas></div>
+  <div class="chart-wrap"><div class="chart-lbl" id="chart-lbl">â€”</div><canvas id="wchart" style="width:100%;height:140px;display:block"></canvas></div>
   <div class="sec-title">Lihaskohtainen edistyminen</div>
   <div class="prog-list" id="prog-list"></div>
   <div class="sec-title">Historia</div>
@@ -332,33 +327,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 <!-- MUOKKAA -->
 <div class="screen" id="s-muokkaa">
   <div class="topbar"><div class="topbar-title">Muokkaa ohjelmaa</div></div>
-  <div class="sec-title">Päivät & liikkeet</div>
+  <div class="sec-title">PÃ¤ivÃ¤t & liikkeet</div>
   <div id="edit-days-list"></div>
-  <div class="sec-title">Lisäravinteet & iho</div>
+  <div class="sec-title">LisÃ¤ravinteet</div>
   <div class="suppl-g" style="margin:0 16px">
-    <div class="suppl-row"><div class="s-icon" style="background:rgba(255,204,0,.12)">☀️</div><div style="flex:1"><div class="s-name">D-vitamiini</div><div class="s-dose">50–100 mcg · aamu</div></div></div>
-    <div class="suppl-row"><div class="s-icon" style="background:rgba(52,199,89,.12)">💪</div><div style="flex:1"><div class="s-name">Kreatiini 5g</div><div class="s-dose">Monohydraatti · aamu</div></div></div>
-    <div class="suppl-row"><div class="s-icon" style="background:rgba(229,57,53,.12)">🥤</div><div style="flex:1"><div class="s-name">Heraproteiini 30–40g</div><div class="s-dose">Treenin jälkeen</div></div></div>
-    <div class="suppl-row"><div class="s-icon" style="background:rgba(175,82,222,.12)">🌙</div><div style="flex:1"><div class="s-name">Magnesium 300mg</div><div class="s-dose">Ilta · uni & palautuminen</div></div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(255,204,0,.12)">â˜€ï¸</div><div style="flex:1"><div class="s-name">D-vitamiini</div><div class="s-dose">50â€“100 mcg Â· aamu</div></div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(52,199,89,.12)">ðŸ’ª</div><div style="flex:1"><div class="s-name">Kreatiini 5g</div><div class="s-dose">Monohydraatti Â· aamu</div></div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(229,57,53,.12)">ðŸ¥¤</div><div style="flex:1"><div class="s-name">Heraproteiini 30â€“40g</div><div class="s-dose">Treenin jÃ¤lkeen</div></div></div>
+    <div class="suppl-row"><div class="s-icon" style="background:rgba(175,82,222,.12)">ðŸŒ™</div><div style="flex:1"><div class="s-name">Magnesium 300mg</div><div class="s-dose">Ilta Â· uni & palautuminen</div></div></div>
   </div>
   <div class="sec-title">Nollaa data</div>
   <div class="reset-section">
-    <div class="reset-row" onclick="confirmReset('workouts')">
-      <div class="reset-info"><div class="reset-name">Nollaa treenidata</div><div class="reset-detail">Poistaa kaikki sarjat ja tulokset</div></div>
-      <div class="reset-arrow" style="color:var(--red)">›</div>
-    </div>
-    <div class="reset-row" onclick="confirmReset('weights')">
-      <div class="reset-info"><div class="reset-name">Nollaa painohistoria</div><div class="reset-detail">Poistaa kaikki painokirjaukset</div></div>
-      <div class="reset-arrow" style="color:var(--red)">›</div>
-    </div>
-    <div class="reset-row" onclick="confirmReset('all')">
-      <div class="reset-info"><div class="reset-name">Nollaa kaikki</div><div class="reset-detail">Palauttaa sovelluksen alkutilaan</div></div>
-      <div class="reset-arrow" style="color:var(--red)">›</div>
-    </div>
+    <div class="reset-row" onclick="confirmReset('workouts')"><div class="reset-info"><div class="reset-name">Nollaa treenidata</div><div class="reset-detail">Poistaa kaikki sarjat ja tulokset</div></div><div class="reset-arrow" style="color:var(--red)">â€º</div></div>
+    <div class="reset-row" onclick="confirmReset('weights')"><div class="reset-info"><div class="reset-name">Nollaa painohistoria</div><div class="reset-detail">Poistaa kaikki painokirjaukset</div></div><div class="reset-arrow" style="color:var(--red)">â€º</div></div>
+    <div class="reset-row" onclick="confirmReset('all')"><div class="reset-info"><div class="reset-name">Nollaa kaikki</div><div class="reset-detail">Palauttaa sovelluksen alkutilaan</div></div><div class="reset-arrow" style="color:var(--red)">â€º</div></div>
   </div>
 </div>
 
-</div><!-- /screens -->
+</div>
 
 <div id="navbar">
   <button class="nb active" onclick="nav('treeni',this)">
@@ -383,70 +369,57 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Nunito
 <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
 <div id="toast"></div>
 <div id="modal"><div class="modal-box"><div class="modal-lbl" id="modal-lbl">Vaihtoehdot</div><div id="modal-items"></div><button class="modal-cancel" onclick="closeModal()">Sulje</button></div></div>
-<div id="summary"><div class="sum-box"><div class="sum-emoji">💪</div><div class="sum-title" id="sum-title"></div><div class="sum-sub" id="sum-sub"></div><div class="sum-grid" id="sum-grid"></div><button class="sum-close" onclick="closeSummary()">Jatka</button></div></div>
+<div id="summary"><div class="sum-box"><div class="sum-emoji">ðŸ’ª</div><div class="sum-title" id="sum-title"></div><div class="sum-sub" id="sum-sub"></div><div class="sum-grid" id="sum-grid"></div><button class="sum-close" onclick="closeSummary()">Jatka</button></div></div>
 <div class="edit-modal-overlay" id="edit-overlay"><div class="edit-modal" id="edit-modal-box"></div></div>
 
 <script>
-// DEFAULT PROGRAM
 const DEFAULT_DAYS=[
-  {key:'ma',label:'Maanantai',short:'Ma',type:'Push 1',sub:'Rinta',color:'var(--push)',dim:'var(--push-dim)',
+  {key:'ma',label:'Maanantai',short:'Ma',type:'Upper A',sub:'Rinta & Triceps',color:'var(--push)',dim:'var(--push-dim)',
    exercises:[
-    {name:'Bench Press (Barbell)',alts:['Dumbbell Bench Press','Smith Machine Press','Push Up'],sets:4,reps:'6–10'},
-    {name:'Incline Chest Fly (Dumbbell)',alts:['Cable Fly','Pec Deck'],sets:3,reps:'12'},
-    {name:'Overhead Press (Dumbbell)',alts:['Barbell OHP','Arnold Press'],sets:3,reps:'10'},
-    {name:'Lateral Raise (Dumbbell)',alts:['Cable Lateral Raise','Machine Lateral Raise'],sets:3,reps:'12–15'},
-    {name:'Tricep Pushdown (Cable)',alts:['Tricep Dip','Skull Crusher'],sets:3,reps:'12'},
+    {name:'Bench Press (Dumbbell)',alts:['Bench Press (Barbell)','Smith Machine Press','Push Up'],sets:4,reps:'8â€“12'},
+    {name:'Chest Fly (Pec Deck)',alts:['Cable Fly','Dumbbell Fly'],sets:3,reps:'12'},
+    {name:'Overhead Press (Dumbbell)',alts:['Barbell OHP','Arnold Press','Machine OHP'],sets:3,reps:'10'},
+    {name:'Lateral Raise (Dumbbell)',alts:['Cable Lateral Raise','Machine Lateral Raise'],sets:3,reps:'12â€“15'},
+    {name:'Tricep Pushdown (Cable)',alts:['Tricep Dip','Skull Crusher','Overhead Extension'],sets:3,reps:'12'},
   ]},
-  {key:'ti',label:'Tiistai',short:'Ti',type:'Pull 1',sub:'Selkä',color:'var(--pull)',dim:'var(--pull-dim)',
+  {key:'ti',label:'Tiistai',short:'Ti',type:'Lower A',sub:'Etureidet & Core',color:'var(--legs)',dim:'var(--legs-dim)',
    exercises:[
-    {name:'Bent Over Row (Barbell)',alts:['Dumbbell Row','T-Bar Row'],sets:4,reps:'6–10'},
-    {name:'Lat Pulldown (Wide Grip)',alts:['Pull Up','Close Grip Pulldown'],sets:4,reps:'8–10'},
-    {name:'Cable Row',alts:['Dumbbell Row','Machine Row'],sets:3,reps:'12'},
-    {name:'Face Pull (Cable)',alts:['Rear Delt Fly (Dumbbell)'],sets:3,reps:'15'},
-    {name:'Bicep Curl (Dumbbell)',alts:['Barbell Curl','Cable Curl'],sets:3,reps:'10–12'},
+    {name:'Leg Press',alts:['Squat (Barbell)','Goblet Squat','Hack Squat'],sets:4,reps:'10â€“12'},
+    {name:'Leg Extension',alts:['Hack Squat','Wall Sit'],sets:3,reps:'12â€“15'},
+    {name:'Lunge (Dumbbell)',alts:['Bulgarian Split Squat','Step Up','Reverse Lunge'],sets:3,reps:'12/jalka'},
+    {name:'Calf Raise (Machine)',alts:['Seated Calf Raise','Standing Calf Raise'],sets:3,reps:'15â€“20'},
+    {name:'Plank',alts:['Dead Bug','Ab Wheel','Hollow Body Hold'],sets:3,reps:'40 sek'},
   ]},
-  {key:'ke',label:'Keskiviikko',short:'Ke',type:'Legs 1',sub:'Etureidet',color:'var(--legs)',dim:'var(--legs-dim)',
+  {key:'ke',label:'Keskiviikko',short:'Ke',type:'Lepo',sub:'Palautuminen',color:'var(--rest)',dim:'var(--rest-dim)',
+   exercises:[]},
+  {key:'to',label:'Torstai',short:'To',type:'Upper B',sub:'SelkÃ¤ & Hauikset',color:'var(--pull)',dim:'var(--pull-dim)',
    exercises:[
-    {name:'Squat (Barbell)',alts:['Leg Press','Goblet Squat'],sets:4,reps:'6–10'},
-    {name:'Lunge (Dumbbell)',alts:['Bulgarian Split Squat','Step Up'],sets:3,reps:'12/jalka'},
-    {name:'Leg Extension',alts:['Hack Squat','Wall Sit'],sets:3,reps:'12–15'},
-    {name:'Calf Raise',alts:['Seated Calf Raise'],sets:4,reps:'15–20'},
-    {name:'Plank',alts:['Dead Bug','Ab Wheel'],sets:3,reps:'40 sek'},
+    {name:'Chest Supported Row (Machine)',alts:['Seated Cable Row','Dumbbell Row','T-Bar Row'],sets:4,reps:'8â€“10'},
+    {name:'Lat Pulldown (Wide Grip)',alts:['Pull Up','Close Grip Pulldown','Assisted Pull Up'],sets:4,reps:'8â€“10'},
+    {name:'Cable Row',alts:['Machine Row','Dumbbell Row'],sets:3,reps:'12'},
+    {name:'Face Pull (Cable)',alts:['Rear Delt Fly (Dumbbell)','Band Pull Apart'],sets:3,reps:'15'},
+    {name:'Bicep Curl (Dumbbell)',alts:['Barbell Curl','Cable Curl','Preacher Curl'],sets:3,reps:'10â€“12'},
   ]},
-  {key:'to',label:'Torstai',short:'To',type:'Push 2',sub:'Hartiat',color:'var(--push)',dim:'var(--push-dim)',
+  {key:'pe',label:'Perjantai',short:'Pe',type:'Lower B',sub:'Takareidet & Core',color:'var(--legs)',dim:'var(--legs-dim)',
    exercises:[
-    {name:'Overhead Press (Barbell)',alts:['Seated Dumbbell Press','Arnold Press'],sets:4,reps:'6–10'},
-    {name:'Incline Bench Press (Dumbbell)',alts:['Incline Barbell Press'],sets:3,reps:'10'},
-    {name:'Lateral Raise (Cable)',alts:['Dumbbell Lateral Raise'],sets:3,reps:'12–15'},
-    {name:'Front Raise (Dumbbell)',alts:['Cable Front Raise'],sets:3,reps:'12'},
-    {name:'Tricep Kickback (Dumbbell)',alts:['Skull Crusher','Overhead Extension'],sets:3,reps:'12'},
+    {name:'Leg Press',alts:['Romanian Deadlift','Hack Squat'],sets:4,reps:'10â€“12'},
+    {name:'Leg Curl (Machine)',alts:['Nordic Curl','Swiss Ball Leg Curl'],sets:3,reps:'12'},
+    {name:'Bulgarian Split Squat',alts:['Reverse Lunge','Step Up','Single Leg Press'],sets:3,reps:'10/jalka'},
+    {name:'Calf Raise (Seated)',alts:['Standing Calf Raise','Calf Raise (Machine)'],sets:3,reps:'15â€“20'},
+    {name:'Crunch',alts:['Hanging Knee Raise','Cable Crunch','Bicycle Crunch'],sets:3,reps:'15â€“20'},
   ]},
-  {key:'pe',label:'Perjantai',short:'Pe',type:'Pull 2',sub:'Hauikset',color:'var(--pull)',dim:'var(--pull-dim)',
-   exercises:[
-    {name:'Lat Pulldown (Narrow Grip)',alts:['Seated Cable Row'],sets:4,reps:'8–10'},
-    {name:'Dumbbell Row',alts:['T-Bar Row','Machine Row'],sets:3,reps:'10–12'},
-    {name:'Straight Arm Pulldown',alts:['Cable Pullover'],sets:3,reps:'12–15'},
-    {name:'Hammer Curl (Dumbbell)',alts:['Rope Hammer Curl'],sets:3,reps:'10–12'},
-    {name:'Bicep Curl (Cable)',alts:['Concentration Curl','Preacher Curl'],sets:3,reps:'12'},
-  ]},
-  {key:'la',label:'Lauantai',short:'La',type:'Legs 2',sub:'Takareidet',color:'var(--legs)',dim:'var(--legs-dim)',
-   exercises:[
-    {name:'Romanian Deadlift',alts:['Stiff Leg Deadlift','Good Morning'],sets:4,reps:'8–10'},
-    {name:'Leg Curl',alts:['Nordic Curl','Swiss Ball Leg Curl'],sets:3,reps:'12'},
-    {name:'Bulgarian Split Squat',alts:['Reverse Lunge','Step Up'],sets:3,reps:'10/jalka'},
-    {name:'Calf Raise (Seated)',alts:['Standing Calf Raise'],sets:3,reps:'15–20'},
-    {name:'Crunch',alts:['Hanging Knee Raise','Cable Crunch'],sets:3,reps:'15–20'},
-  ]},
-  {key:'su',label:'Sunnuntai',short:'Su',type:'Lepo',sub:'Vapaa / Lisätreeni',color:'#8E8E93',dim:'rgba(142,142,147,.12)',
+  {key:'la',label:'Lauantai',short:'La',type:'Lepo',sub:'Vapaa / LisÃ¤treeni',color:'var(--rest)',dim:'var(--rest-dim)',
+   exercises:[]},
+  {key:'su',label:'Sunnuntai',short:'Su',type:'Lepo',sub:'Vapaa / LisÃ¤treeni',color:'var(--rest)',dim:'var(--rest-dim)',
    exercises:[]},
 ];
 
 const TRACK_EX=[
-  {name:'Bench Press (Barbell)',label:'Penkki',color:'var(--push)'},
-  {name:'Bent Over Row (Barbell)',label:'Soutu',color:'var(--pull)'},
-  {name:'Squat (Barbell)',label:'Kyykky',color:'var(--legs)'},
-  {name:'Overhead Press (Barbell)',label:'OHP',color:'var(--push)'},
-  {name:'Romanian Deadlift',label:'Romanian DL',color:'var(--legs)'},
+  {name:'Bench Press (Dumbbell)',label:'Penkki',color:'var(--push)'},
+  {name:'Chest Supported Row (Machine)',label:'Tuettu soutu',color:'var(--pull)'},
+  {name:'Leg Press',label:'JalkaprÃ¤ssi',color:'var(--legs)'},
+  {name:'Overhead Press (Dumbbell)',label:'OHP',color:'var(--push)'},
+  {name:'Leg Curl (Machine)',label:'Jalkakoukistus',color:'var(--legs)'},
   {name:'Lat Pulldown (Wide Grip)',label:'Latasoutu',color:'var(--pull)'},
 ];
 
@@ -456,12 +429,10 @@ const todayKey=DN[new Date().getDay()];
 function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 
-let DAYS=ld('days5',DEFAULT_DAYS);
-// Migraatio: lisää sunnuntai jos puuttuu
-if(!DAYS.find(d=>d.key==='su')){
-  DAYS.push({key:'su',label:'Sunnuntai',short:'Su',type:'Lepo',sub:'Vapaa / Lisätreeni',color:'#8E8E93',dim:'rgba(142,142,147,.12)',exercises:[]});
-  sv('days5',DAYS);
-}
+// Ladataan ohjelma â€” jos vanha data lÃ¶ytyy pÃ¤ivitetÃ¤Ã¤n uuteen
+let DAYS=DEFAULT_DAYS;
+sv('days5',DAYS);
+
 let wData=ld('wd5',{});
 let wLog=ld('wl5',[]);
 let openDays=ld('od5',[todayKey]);
@@ -471,7 +442,6 @@ let exPhotos=ld('ep5',{});
 let calYear=new Date().getFullYear();
 let calMonth=new Date().getMonth();
 
-// HAPTIC
 function haptic(t){
   if(navigator.vibrate){
     if(t==='light')navigator.vibrate(10);
@@ -481,7 +451,6 @@ function haptic(t){
   }
 }
 
-// SWIPE NAV
 let tx=0,ty=0;
 const SO=['treeni','kalenteri','seuranta','muokkaa'];
 let cs=0;
@@ -489,8 +458,8 @@ document.getElementById('screens').addEventListener('touchstart',e=>{tx=e.touche
 document.getElementById('screens').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*2){
-    if(dx<0&&cs<SO.length-1){nav(SO[cs+1],document.querySelectorAll('.nb')[cs+1]);}
-    else if(dx>0&&cs>0){nav(SO[cs-1],document.querySelectorAll('.nb')[cs-1]);}
+    if(dx<0&&cs<SO.length-1)nav(SO[cs+1],document.querySelectorAll('.nb')[cs+1]);
+    else if(dx>0&&cs>0)nav(SO[cs-1],document.querySelectorAll('.nb')[cs-1]);
   }
 },{passive:true});
 
@@ -506,7 +475,6 @@ function nav(name,btn){
   if(name==='muokkaa')renderEditDays();
 }
 
-// TREENI
 function buildDays(){
   const now=new Date();
   const ds=now.toLocaleDateString('fi-FI',{weekday:'long',day:'numeric',month:'long'});
@@ -522,26 +490,25 @@ function buildDays(){
     const card=document.createElement('div');
     card.className='day-card'+(isToday?' today':'');card.id='dc-'+day.key;
     let pills='';
-    if(isToday)pills+=`<div class="pill" style="background:${day.dim};color:${day.color}">Tänään</div>`;
-    if(isDone)pills+=`<div class="pill" style="background:var(--green-dim);color:var(--green);margin-left:6px">✓ Tehty</div>`;
+    if(isToday)pills+=`<div class="pill" style="background:${day.dim};color:${day.color}">TÃ¤nÃ¤Ã¤n</div>`;
+    if(isDone)pills+=`<div class="pill" style="background:var(--green-dim);color:var(--green);margin-left:6px">âœ“ Tehty</div>`;
     else if(doneCount>0)pills+=`<div class="pill" style="background:var(--bg3);color:var(--text2);margin-left:6px">${doneCount}/${totalSets}</div>`;
     card.innerHTML=`
       <div class="day-top" onclick="toggleDay('${day.key}')">
         <div class="day-dot" style="background:${day.color}"></div>
-        <div class="day-info"><div class="day-name">${day.label}</div><div class="day-type">${day.type} · ${day.sub}</div></div>
+        <div class="day-info"><div class="day-name">${day.label}</div><div class="day-type">${day.type} Â· ${day.sub}</div></div>
         ${pills}
-        <div class="day-chevron${isOpen?' open':''}" id="chev-${day.key}">▶</div>
+        <div class="day-chevron${isOpen?' open':''}" id="chev-${day.key}">â–¶</div>
       </div>
       <div class="day-body${isOpen?' open':''}" id="db-${day.key}">
         ${day.exercises.length>0
           ? day.exercises.map((ex,ei)=>buildExHTML(day.key,ex,ei)).join('')
-          : `<div class="empty-day-msg"><span>Ei liikkeitä</span><button onclick="nav('muokkaa',document.querySelectorAll('.nb')[3])">Lisää Muokkaa-osiossa →</button></div>`}
+          : `<div class="empty-day-msg"><span>LepopÃ¤ivÃ¤ ðŸ˜´</span></div>`}
       </div>`;
     container.appendChild(card);
   });
   const todayDay=DAYS.find(d=>d.key===todayKey);
-  const hasExercises=todayDay&&todayDay.exercises.length>0;
-  document.getElementById('finish-btn').style.display=(openDays.includes(todayKey)&&hasExercises)?'block':'none';
+  document.getElementById('finish-btn').style.display=(openDays.includes(todayKey)&&todayDay&&todayDay.exercises.length>0)?'block':'none';
 }
 
 function buildWeekStrip(){
@@ -560,7 +527,7 @@ function buildWeekStrip(){
 function buildStreakVol(){
   const wid=getWeekId();let streak=0;
   for(let w=wid;w>=wid-20;w--){
-    if(DAYS.filter(d=>completedDays.includes(d.key+'-'+w)).length>=4)streak++;else break;
+    if(DAYS.filter(d=>completedDays.includes(d.key+'-'+w)).length>=3)streak++;else break;
   }
   document.getElementById('streak-num').textContent=streak;
   let vol=0;const calData=ld('calData5',{});
@@ -582,7 +549,7 @@ function getWeekId(){
 function getThisWeekDates(){
   const today=new Date();const dow=(today.getDay()+6)%7;
   const mon=new Date(today);mon.setDate(today.getDate()-dow);
-  return Array.from({length:6},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d.toLocaleDateString('fi-FI');});
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d.toLocaleDateString('fi-FI');});
 }
 
 function buildExHTML(dayKey,ex,ei){
@@ -593,7 +560,7 @@ function buildExHTML(dayKey,ex,ei){
     const kg=saved[`kg${si}`]||'';const rp=saved[`rp${si}`]||'';
     const done=saved[`done${si}`]||false;
     const prevKg=saved[`prevkg${si}`]||'';const prevRp=saved[`prevrp${si}`]||'';
-    const prevStr=prevKg&&prevRp?`${prevKg}×${prevRp}`:(si<ex.sets?ex.reps:'–');
+    const prevStr=prevKg&&prevRp?`${prevKg}Ã—${prevRp}`:(si<ex.sets?ex.reps:'â€“');
     return `<div class="set-row">
       <div class="set-num">${si+1}</div>
       <div class="set-prev">${prevStr}</div>
@@ -604,23 +571,23 @@ function buildExHTML(dayKey,ex,ei){
       </button>
     </div>`;
   }).join('');
-  const prHTML=saved.showPR?`<div class="pr-banner"><span style="font-size:16px">🏆</span><div class="pr-text">Uusi henkilökohtainen ennätys!</div></div>`:'';
+  const prHTML=saved.showPR?`<div class="pr-banner"><span style="font-size:16px">ðŸ†</span><div class="pr-text">Uusi henkilÃ¶kohtainen ennÃ¤tys!</div></div>`:'';
   const _eName=ex.name.replace(/"/g,'&quot;');
   const _photo=exPhotos[ex.name];
   const exPhotoHTML=_photo
-    ?`<div class="ex-photo-area"><img class="ex-photo-thumb" src="${_photo}" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)"><div class="ex-photo-change" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)">Vaihda kuva ›</div></div>`
-    :`<div class="ex-photo-area"><button class="ex-photo-add" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Lisää harjoituskuva</button></div>`;
+    ?`<div class="ex-photo-area"><img class="ex-photo-thumb" src="${_photo}" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)"><div class="ex-photo-change" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)">Vaihda kuva â€º</div></div>`
+    :`<div class="ex-photo-area"><button class="ex-photo-add" data-exname="${_eName}" onclick="triggerPhotoInput(this.dataset.exname)"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>LisÃ¤Ã¤ harjoituskuva</button></div>`;
   return `<div class="ex-block" id="eb-${exKey}">
     <div class="ex-header">
       <div class="ex-name">${ex.name}</div>
-      <button class="ex-btn" data-name="${ex.name.replace(/"/g,'&quot;')}" data-alts="${(ex.alts||[]).join('||').replace(/"/g,'&quot;')}" onclick="showAltsBtn(this)">Vaihtoehto</button>
+      <button class="ex-btn" data-name="${_eName}" data-alts="${(ex.alts||[]).join('||').replace(/"/g,'&quot;')}" onclick="showAltsBtn(this)">Vaihtoehto</button>
     </div>
     ${prHTML}${exPhotoHTML}
     <div class="set-table">
       <div class="set-thead"><span>Set</span><span>Edellinen</span><span>kg</span><span>Toistot</span><span></span></div>
       <div>${rows}</div>
     </div>
-    <button class="add-set-btn" onclick="addSet('${dayKey}',${ei})">+ Lisää sarja</button>
+    <button class="add-set-btn" onclick="addSet('${dayKey}',${ei})">+ LisÃ¤Ã¤ sarja</button>
   </div>`;
 }
 
@@ -652,7 +619,7 @@ function toggleDone(exKey,si,dayKey,exName){
     if(kg&&rp){
       const prevKg=parseFloat(wData[exKey][`prevkg${si}`]||0);
       const prevRp=parseFloat(wData[exKey][`prevrp${si}`]||0);
-      if(kg*rp>prevKg*prevRp&&prevKg>0){wData[exKey].showPR=true;haptic('pr');toast('🏆 Uusi ennätys!');}
+      if(kg*rp>prevKg*prevRp&&prevKg>0){wData[exKey].showPR=true;haptic('pr');toast('ðŸ† Uusi ennÃ¤tys!');}
       if(!liftHistory[exName])liftHistory[exName]=[];
       const today=new Date().toLocaleDateString('fi-FI');
       const idx=liftHistory[exName].findIndex(e=>e.date===today);
@@ -707,8 +674,8 @@ function updateDayPill(dayKey){
   const top=card.querySelector('.day-top');
   top.querySelectorAll('.pill').forEach(p=>p.remove());
   const chev=top.querySelector('.day-chevron');
-  if(isToday){const p=document.createElement('div');p.className='pill';p.style.cssText=`background:${day.dim};color:${day.color}`;p.textContent='Tänään';top.insertBefore(p,chev);}
-  if(isDone){const p=document.createElement('div');p.className='pill';p.style.cssText='background:var(--green-dim);color:var(--green);margin-left:6px';p.textContent='✓ Tehty';top.insertBefore(p,chev);}
+  if(isToday){const p=document.createElement('div');p.className='pill';p.style.cssText=`background:${day.dim};color:${day.color}`;p.textContent='TÃ¤nÃ¤Ã¤n';top.insertBefore(p,chev);}
+  if(isDone){const p=document.createElement('div');p.className='pill';p.style.cssText='background:var(--green-dim);color:var(--green);margin-left:6px';p.textContent='âœ“ Tehty';top.insertBefore(p,chev);}
   else if(doneCount>0){const p=document.createElement('div');p.className='pill';p.style.cssText='background:var(--bg3);color:var(--text2);margin-left:6px';p.textContent=`${doneCount}/${totalSets}`;top.insertBefore(p,chev);}
 }
 
@@ -718,55 +685,39 @@ function saveWorkoutSnapshot(dayKey){
   let calData=ld('calData5',{});
   const snap={dayKey,label:day.label,type:day.type,exercises:[]};
   day.exercises.forEach((ex,ei)=>{
-    const exKey=`${dayKey}_${ei}`;
-    const saved=wData[exKey]||{};
-    const sets=[];
-    for(let s=0;s<10;s++){
-      if(saved[`done${s}`]&&saved[`kg${s}`]&&saved[`rp${s}`]){
-        sets.push({kg:saved[`kg${s}`],rp:saved[`rp${s}`]});
-      }
-    }
+    const exKey=`${dayKey}_${ei}`;const saved=wData[exKey]||{};const sets=[];
+    for(let s=0;s<10;s++){if(saved[`done${s}`]&&saved[`kg${s}`]&&saved[`rp${s}`])sets.push({kg:saved[`kg${s}`],rp:saved[`rp${s}`]});}
     if(sets.length)snap.exercises.push({name:ex.name,sets});
   });
-  calData[today]=snap;
-  sv('calData5',calData);
+  calData[today]=snap;sv('calData5',calData);
 }
 
 function finishWorkout(){
   const id=todayKey+'-'+getWeekId();
   if(!completedDays.includes(id))completedDays.push(id);
-  sv('cd5',completedDays);
-  haptic('success');
+  sv('cd5',completedDays);haptic('success');
   saveWorkoutSnapshot(todayKey);
   const doneCount=countDone(todayKey);
   const day=DAYS.find(d=>d.key===todayKey);
   let totalVol=0;
   if(day){day.exercises.forEach((_,ei)=>{const exKey=`${todayKey}_${ei}`;const saved=wData[exKey]||{};for(let s=0;s<10;s++){const kg=parseFloat(saved[`kg${s}`]||0);const rp=parseFloat(saved[`rp${s}`]||0);if(saved[`done${s}`]&&kg&&rp)totalVol+=kg*rp;}});}
-  document.getElementById('sum-title').textContent=`${day?day.label:''} tehty! 💪`;
-  document.getElementById('sum-sub').textContent='Hyvää työtä — syö proteiinia ja palaudu hyvin!';
+  document.getElementById('sum-title').textContent=`${day?day.label:''} tehty! ðŸ’ª`;
+  document.getElementById('sum-sub').textContent='HyvÃ¤Ã¤ tyÃ¶tÃ¤ â€” syÃ¶ proteiinia ja palaudu hyvin!';
   document.getElementById('sum-grid').innerHTML=`
-    <div class="sg"><div class="sg-val">${day?day.exercises.length:0}</div><div class="sg-lbl">liikettä</div></div>
+    <div class="sg"><div class="sg-val">${day?day.exercises.length:0}</div><div class="sg-lbl">liikettÃ¤</div></div>
     <div class="sg"><div class="sg-val">${doneCount}</div><div class="sg-lbl">sarjaa</div></div>
     <div class="sg"><div class="sg-val">${Math.round(totalVol)}</div><div class="sg-lbl">kg nostettu</div></div>`;
-  document.getElementById('summary').classList.add('open');
-  buildDays();
+  document.getElementById('summary').classList.add('open');buildDays();
 }
 function closeSummary(){document.getElementById('summary').classList.remove('open');}
 
-// KALENTERI
 function renderCalendar(){
-  const months=['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+  const months=['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','KesÃ¤kuu','HeinÃ¤kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
   document.getElementById('cal-month').textContent=months[calMonth]+' '+calYear;
-  const calData=ld('calData5',{});
-  const grid=document.getElementById('cal-grid');
-  grid.innerHTML='';
-  ['Ma','Ti','Ke','To','Pe','La','Su'].forEach(d=>{
-    const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);
-  });
-  const firstDay=new Date(calYear,calMonth,1);
-  const lastDay=new Date(calYear,calMonth+1,0);
-  const startDow=(firstDay.getDay()+6)%7;
-  const today=new Date();
+  const calData=ld('calData5',{});const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  ['Ma','Ti','Ke','To','Pe','La','Su'].forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);});
+  const firstDay=new Date(calYear,calMonth,1);const lastDay=new Date(calYear,calMonth+1,0);
+  const startDow=(firstDay.getDay()+6)%7;const today=new Date();
   for(let i=0;i<startDow;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
   for(let d=1;d<=lastDay.getDate();d++){
     const dateStr=`${d.toString().padStart(2,'0')}.${(calMonth+1).toString().padStart(2,'0')}.${calYear}`;
@@ -774,43 +725,35 @@ function renderCalendar(){
     const hasWorkout=!!calData[dateStr];
     const el=document.createElement('div');
     el.className='cal-day'+(isToday?' today':'')+(hasWorkout?' has-workout':'');
-    el.textContent=d;
-    el.onclick=()=>showCalDay(dateStr,hasWorkout);
-    grid.appendChild(el);
+    el.textContent=d;el.onclick=()=>showCalDay(dateStr,hasWorkout);grid.appendChild(el);
   }
   document.getElementById('cal-detail').classList.remove('open');
 }
 
 function showCalDay(dateStr,hasWorkout){
-  const calData=ld('calData5',{});
-  const detail=document.getElementById('cal-detail');
+  const calData=ld('calData5',{});const detail=document.getElementById('cal-detail');
   const snap=calData[dateStr];
   document.getElementById('cal-detail-title').textContent=dateStr;
   if(!snap||!snap.exercises||!snap.exercises.length){
-    document.getElementById('cal-detail-sub').textContent=hasWorkout?snap.label+' · '+snap.type:'Ei treeniä tänä päivänä';
-    document.getElementById('cal-detail-body').innerHTML=`<div class="cal-empty-day">Ei kirjattuja sarjoja tälle päivälle.</div>`;
+    document.getElementById('cal-detail-sub').textContent=hasWorkout?(snap.label+' Â· '+snap.type):'Ei treeniÃ¤';
+    document.getElementById('cal-detail-body').innerHTML=`<div class="cal-empty-day">Ei kirjattuja sarjoja.</div>`;
   } else {
-    document.getElementById('cal-detail-sub').textContent=snap.label+' · '+snap.type;
+    document.getElementById('cal-detail-sub').textContent=snap.label+' Â· '+snap.type;
     document.getElementById('cal-detail-body').innerHTML=snap.exercises.map(ex=>`
-      <div class="cal-ex-row">
-        <div class="cal-ex-name">${ex.name}</div>
-        <div class="cal-sets">
-          ${ex.sets.map((s,i)=>`<div class="cal-set-pill">Sarja ${i+1}: ${s.kg}kg × ${s.rp}</div>`).join('')}
-        </div>
+      <div class="cal-ex-row"><div class="cal-ex-name">${ex.name}</div>
+        <div class="cal-sets">${ex.sets.map((s,i)=>`<div class="cal-set-pill">Sarja ${i+1}: ${s.kg}kg Ã— ${s.rp}</div>`).join('')}</div>
       </div>`).join('');
   }
-  detail.classList.add('open');
-  haptic('light');
+  detail.classList.add('open');haptic('light');
   setTimeout(()=>detail.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
 }
 
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();haptic('light');}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();haptic('light');}
 
-// SEURANTA
 function saveWeight(){
   const inp=document.getElementById('w-inp');const val=parseFloat(inp.value);
-  if(!val||val<20||val>300){toast('Syötä kelvollinen paino');return;}
+  if(!val||val<20||val>300){toast('SyÃ¶tÃ¤ kelvollinen paino');return;}
   const today=new Date().toLocaleDateString('fi-FI');
   const idx=wLog.findIndex(w=>w.date===today);
   if(idx>=0)wLog[idx].weight=val;else wLog.unshift({date:today,weight:val});
@@ -819,28 +762,26 @@ function saveWeight(){
 }
 
 function renderSeuranta(){
-  const cur=wLog[0],prev=wLog[1];
-  const delta=cur&&prev?(cur.weight-prev.weight):null;
+  const cur=wLog[0],prev=wLog[1];const delta=cur&&prev?(cur.weight-prev.weight):null;
   document.getElementById('stats-row').innerHTML=`
-    <div class="stat-box"><div class="stat-lbl">Nykyinen paino</div><div class="stat-val">${cur?cur.weight:'—'}<span class="stat-unit"> kg</span></div></div>
+    <div class="stat-box"><div class="stat-lbl">Nykyinen paino</div><div class="stat-val">${cur?cur.weight:'â€”'}<span class="stat-unit"> kg</span></div></div>
     <div class="stat-box"><div class="stat-lbl">Muutos</div><div class="stat-val" style="color:${delta===null?'var(--text3)':delta>0?'var(--red)':'var(--green)'}">
-      ${delta===null?'—':(delta>0?'+':'')+delta.toFixed(1)}<span class="stat-unit"> kg</span></div></div>`;
+      ${delta===null?'â€”':(delta>0?'+':'')+delta.toFixed(1)}<span class="stat-unit"> kg</span></div></div>`;
   drawChart();renderProgress();renderHistory();
 }
 
 function drawChart(){
   const canvas=document.getElementById('wchart');const ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1;
-  const W=canvas.parentElement.clientWidth-32;const H=140;
+  const dpr=window.devicePixelRatio||1;const W=canvas.parentElement.clientWidth-32;const H=140;
   canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.scale(dpr,dpr);
   const data=wLog.slice(0,12).reverse();
-  if(data.length<2){ctx.fillStyle='#AEAEB2';ctx.font='13px Nunito,-apple-system,sans-serif';ctx.textAlign='center';ctx.fillText('Lisää 2+ painokirjausta',W/2,H/2);return;}
+  if(data.length<2){ctx.fillStyle='#AEAEB2';ctx.font='13px Nunito,sans-serif';ctx.textAlign='center';ctx.fillText('LisÃ¤Ã¤ 2+ painokirjausta',W/2,H/2);return;}
   const vals=data.map(d=>d.weight);const minV=Math.min(...vals)-1,maxV=Math.max(...vals)+1;
   const pad={t:10,r:10,b:28,l:36};const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
   const toX=i=>pad.l+i*(cW/(data.length-1));const toY=v=>pad.t+cH-(v-minV)/(maxV-minV)*cH;
   ctx.strokeStyle='rgba(0,0,0,.07)';ctx.lineWidth=1;
   for(let i=0;i<=4;i++){const y=pad.t+i*(cH/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();}
-  ctx.fillStyle='#AEAEB2';ctx.font='10px Nunito,-apple-system,sans-serif';ctx.textAlign='right';
+  ctx.fillStyle='#AEAEB2';ctx.font='10px Nunito,sans-serif';ctx.textAlign='right';
   for(let i=0;i<=4;i++){const v=minV+(maxV-minV)*(1-i/4);ctx.fillText(v.toFixed(1),pad.l-4,pad.t+i*(cH/4)+4);}
   ctx.beginPath();ctx.moveTo(toX(0),toY(vals[0]));
   for(let i=1;i<data.length;i++)ctx.lineTo(toX(i),toY(vals[i]));
@@ -852,7 +793,7 @@ function drawChart(){
   data.forEach((d,i)=>{if(i===0)ctx.moveTo(toX(i),toY(d.weight));else ctx.lineTo(toX(i),toY(d.weight));});ctx.stroke();
   data.forEach((d,i)=>{
     ctx.beginPath();ctx.arc(toX(i),toY(d.weight),3.5,0,Math.PI*2);ctx.fillStyle='#E53935';ctx.fill();
-    if(i===0||i===data.length-1){const p=d.date.split('.');ctx.fillStyle='#AEAEB2';ctx.font='9px Nunito,-apple-system,sans-serif';ctx.textAlign='center';ctx.fillText(p[0]+'.'+p[1],toX(i),H-6);}
+    if(i===0||i===data.length-1){const p=d.date.split('.');ctx.fillStyle='#AEAEB2';ctx.font='9px Nunito,sans-serif';ctx.textAlign='center';ctx.fillText(p[0]+'.'+p[1],toX(i),H-6);}
   });
   document.getElementById('chart-lbl').textContent=`Viimeiset ${data.length} kirjausta`;
 }
@@ -865,51 +806,49 @@ function renderProgress(){
     const gain=last.kg-first.kg;const pct=first.kg>0?Math.min((last.kg/first.kg)*100,100):50;
     return{te,first,last,gain,pct};
   }).filter(Boolean);
-  if(!items.length){list.innerHTML=`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;color:var(--text3);font-size:14px;line-height:1.7;font-weight:600;box-shadow:var(--shadow-sm)">Merkitse sarjoja tehdyiksi niin<br>näet edistymisesi täällä.</div>`;return;}
+  if(!items.length){list.innerHTML=`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;color:var(--text3);font-size:14px;line-height:1.7;font-weight:600">Merkitse sarjoja tehdyiksi niin<br>nÃ¤et edistymisesi tÃ¤Ã¤llÃ¤.</div>`;return;}
   list.innerHTML=items.map(({te,first,last,gain,pct})=>`
     <div class="prog-card">
       <div class="prog-header"><div class="prog-name">${te.label}</div>
         <div class="prog-gain" style="background:${gain>=0?'var(--green-dim)':'var(--red-dim)'};color:${gain>=0?'var(--green)':'var(--red)'}">
-          ${gain>=0?'+':''}${gain.toFixed(1)} kg</div>
-      </div>
+          ${gain>=0?'+':''}${gain.toFixed(1)} kg</div></div>
       <div class="prog-bar-bg"><div class="prog-bar" style="width:${pct}%;background:${te.color}"></div></div>
-      <div class="prog-meta"><div class="prog-start">Alku: ${first.kg}kg × ${first.rp}</div><div class="prog-cur">Nyt: ${last.kg}kg × ${last.rp}</div></div>
+      <div class="prog-meta"><div class="prog-start">Alku: ${first.kg}kg Ã— ${first.rp}</div><div class="prog-cur">Nyt: ${last.kg}kg Ã— ${last.rp}</div></div>
     </div>`).join('');
 }
 
 function renderHistory(){
   const list=document.getElementById('hist-list');
-  if(!wLog.length){list.innerHTML='<div class="empty">Ei kirjauksia vielä.</div>';return;}
+  if(!wLog.length){list.innerHTML='<div class="empty">Ei kirjauksia vielÃ¤.</div>';return;}
   list.innerHTML=wLog.slice(0,20).map((w,i)=>{
     const p=wLog[i+1];const d=p?(w.weight-p.weight):null;const cls=d===null?'':d>0?'d-up':'d-dn';
-    return `<div class="hist-row"><div class="hist-date">${w.date}</div><div class="hist-kg">${w.weight} kg</div><div class="hist-d ${cls}">${d!==null?(d>0?'+':'')+d.toFixed(1)+' kg':'—'}</div></div>`;
+    return `<div class="hist-row"><div class="hist-date">${w.date}</div><div class="hist-kg">${w.weight} kg</div><div class="hist-d ${cls}">${d!==null?(d>0?'+':'')+d.toFixed(1)+' kg':'â€”'}</div></div>`;
   }).join('');
 }
 
-// MUOKKAA
 function renderEditDays(){
   const container=document.getElementById('edit-days-list');container.innerHTML='';
   DAYS.forEach((day,di)=>{
     const card=document.createElement('div');card.className='edit-day-card';
-    const bodyId=`edb-${day.key}`;
-    const chevId=`edch-${day.key}`;
+    const bodyId=`edb-${day.key}`;const chevId=`edch-${day.key}`;
     card.innerHTML=`
       <div class="edit-day-header" onclick="toggleEditDay('${bodyId}','${chevId}')">
         <div class="edit-day-dot" style="background:${day.color}"></div>
-        <div class="edit-day-name">${day.label} · ${day.type}</div>
-        <div class="edit-day-chevron" id="${chevId}">▶</div>
+        <div class="edit-day-name">${day.label} Â· ${day.type}</div>
+        <div class="edit-day-chevron" id="${chevId}">â–¶</div>
       </div>
       <div class="edit-day-body" id="${bodyId}">
         ${day.exercises.map((ex,ei)=>`
           <div class="edit-ex-row">
             <div class="edit-ex-info">
               <div class="edit-ex-name-display">${ex.name}</div>
-              <div class="edit-ex-sets">${ex.sets} sarjaa · ${ex.reps} toistoa</div>
+              <div class="edit-ex-sets">${ex.sets} sarjaa Â· ${ex.reps} toistoa</div>
             </div>
             <button class="edit-btn" onclick="openEditModal(${di},${ei})">Muokkaa</button>
           </div>`).join('')}
+        ${day.exercises.length===0?'<div style="padding:12px 16px;color:var(--text3);font-size:13px;font-weight:600">LepopÃ¤ivÃ¤ â€” voit lisÃ¤tÃ¤ liikkeitÃ¤</div>':''}
         <div style="padding:10px 16px">
-          <button onclick="openAddExercise(${di})" style="width:100%;padding:10px;border:1.5px dashed var(--border3);border-radius:var(--r-sm);background:none;color:var(--blue);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">+ Lisää liike</button>
+          <button onclick="openAddExercise(${di})" style="width:100%;padding:10px;border:1.5px dashed var(--border3);border-radius:var(--r-sm);background:none;color:var(--blue);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">+ LisÃ¤Ã¤ liike</button>
         </div>
       </div>`;
     container.appendChild(card);
@@ -919,61 +858,50 @@ function renderEditDays(){
 function toggleEditDay(bodyId,chevId){
   const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);
   const isOpen=body.classList.contains('open');
-  body.classList.toggle('open',!isOpen);chev.classList.toggle('open',!isOpen);
-  haptic('light');
+  body.classList.toggle('open',!isOpen);chev.classList.toggle('open',!isOpen);haptic('light');
 }
 
 let editingDi=-1,editingEi=-1;
 
 function openEditModal(di,ei){
   editingDi=di;editingEi=ei;
-  const ex=DAYS[di].exercises[ei];
-  const day=DAYS[di];
+  const ex=DAYS[di].exercises[ei];const day=DAYS[di];
   document.getElementById('edit-modal-box').innerHTML=`
-    <div class="edit-modal-title">Muokkaa liikettä</div>
-    <div class="edit-modal-sub">${day.label} · ${day.type}</div>
+    <div class="edit-modal-title">Muokkaa liikettÃ¤</div>
+    <div class="edit-modal-sub">${day.label} Â· ${day.type}</div>
     <div class="edit-field-label">Liikkeen nimi</div>
-    <input class="edit-inp" id="em-name" value="${ex.name}" placeholder="Liikkeen nimi">
+    <input class="edit-inp" id="em-name" value="${ex.name}">
     <div class="edit-field-label">Sarjat</div>
-    <div class="edit-sets-row">
-      <input class="edit-sets-inp" id="em-sets" type="number" value="${ex.sets}" min="1" max="10">
-      <span style="color:var(--text2);font-size:14px;font-weight:600">sarjaa</span>
-    </div>
+    <div class="edit-sets-row"><input class="edit-sets-inp" id="em-sets" type="number" value="${ex.sets}" min="1" max="10"><span style="color:var(--text2);font-size:14px;font-weight:600">sarjaa</span></div>
     <div class="edit-field-label">Toistot / ohje</div>
-    <input class="edit-inp" id="em-reps" value="${ex.reps}" placeholder="esim. 8-12 tai 40 sek">
+    <input class="edit-inp" id="em-reps" value="${ex.reps}">
     <button class="edit-save-btn" onclick="saveEditModal()">Tallenna muutokset</button>
     <button class="edit-cancel-btn" onclick="closeEditModal()">Peruuta</button>
-    <button class="edit-danger-btn" onclick="deleteExercise(${di},${ei})">Poista tämä liike</button>`;
-  document.getElementById('edit-overlay').classList.add('open');
-  haptic('light');
+    <button class="edit-danger-btn" onclick="deleteExercise(${di},${ei})">Poista tÃ¤mÃ¤ liike</button>`;
+  document.getElementById('edit-overlay').classList.add('open');haptic('light');
 }
 
 function openAddExercise(di){
-  editingDi=di;editingEi=-1;
-  const day=DAYS[di];
+  editingDi=di;editingEi=-1;const day=DAYS[di];
   document.getElementById('edit-modal-box').innerHTML=`
-    <div class="edit-modal-title">Lisää liike</div>
-    <div class="edit-modal-sub">${day.label} · ${day.type}</div>
+    <div class="edit-modal-title">LisÃ¤Ã¤ liike</div>
+    <div class="edit-modal-sub">${day.label} Â· ${day.type}</div>
     <div class="edit-field-label">Liikkeen nimi</div>
     <input class="edit-inp" id="em-name" placeholder="esim. Cable Fly">
     <div class="edit-field-label">Sarjat</div>
-    <div class="edit-sets-row">
-      <input class="edit-sets-inp" id="em-sets" type="number" value="3" min="1" max="10">
-      <span style="color:var(--text2);font-size:14px;font-weight:600">sarjaa</span>
-    </div>
+    <div class="edit-sets-row"><input class="edit-sets-inp" id="em-sets" type="number" value="3" min="1" max="10"><span style="color:var(--text2);font-size:14px;font-weight:600">sarjaa</span></div>
     <div class="edit-field-label">Toistot / ohje</div>
     <input class="edit-inp" id="em-reps" placeholder="esim. 12" value="12">
-    <button class="edit-save-btn" onclick="saveAddExercise()">Lisää liike</button>
+    <button class="edit-save-btn" onclick="saveAddExercise()">LisÃ¤Ã¤ liike</button>
     <button class="edit-cancel-btn" onclick="closeEditModal()">Peruuta</button>`;
-  document.getElementById('edit-overlay').classList.add('open');
-  haptic('light');
+  document.getElementById('edit-overlay').classList.add('open');haptic('light');
 }
 
 function saveEditModal(){
   const name=document.getElementById('em-name').value.trim();
   const sets=parseInt(document.getElementById('em-sets').value)||3;
   const reps=document.getElementById('em-reps').value.trim();
-  if(!name){toast('Syötä liikkeen nimi');return;}
+  if(!name){toast('SyÃ¶tÃ¤ liikkeen nimi');return;}
   DAYS[editingDi].exercises[editingEi].name=name;
   DAYS[editingDi].exercises[editingEi].sets=sets;
   DAYS[editingDi].exercises[editingEi].reps=reps;
@@ -984,9 +912,9 @@ function saveAddExercise(){
   const name=document.getElementById('em-name').value.trim();
   const sets=parseInt(document.getElementById('em-sets').value)||3;
   const reps=document.getElementById('em-reps').value.trim();
-  if(!name){toast('Syötä liikkeen nimi');return;}
+  if(!name){toast('SyÃ¶tÃ¤ liikkeen nimi');return;}
   DAYS[editingDi].exercises.push({name,sets,reps,alts:[]});
-  sv('days5',DAYS);closeEditModal();buildDays();renderEditDays();toast('Liike lisätty!');haptic('success');
+  sv('days5',DAYS);closeEditModal();buildDays();renderEditDays();toast('Liike lisÃ¤tty!');haptic('success');
 }
 
 function deleteExercise(di,ei){
@@ -999,7 +927,7 @@ function closeEditModal(){document.getElementById('edit-overlay').classList.remo
 document.getElementById('edit-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('edit-overlay'))closeEditModal();});
 
 function confirmReset(type){
-  const msgs={workouts:'Nollaanko kaikki treenidata?',weights:'Nollaanko painohistoria?',all:'Nollaanko KAIKKI data? Tätä ei voi peruuttaa.'};
+  const msgs={workouts:'Nollaanko kaikki treenidata?',weights:'Nollaanko painohistoria?',all:'Nollaanko KAIKKI data?'};
   if(!confirm(msgs[type]))return;
   if(type==='workouts'||type==='all'){wData={};sv('wd5',{});liftHistory={};sv('lh5',{});completedDays=[];sv('cd5',[]);sv('calData5',{});}
   if(type==='weights'||type==='all'){wLog=[];sv('wl5',[]);}
@@ -1007,11 +935,10 @@ function confirmReset(type){
   buildDays();renderSeuranta();toast('Nollattu!');haptic('success');
 }
 
-// ALTS MODAL
 function showAltsBtn(btn){
-  const name=btn.getAttribute("data-name");
-  const raw=btn.getAttribute("data-alts");
-  const alts=raw?raw.split("||").filter(Boolean):[];
+  const name=btn.getAttribute('data-name');
+  const raw=btn.getAttribute('data-alts');
+  const alts=raw?raw.split('||').filter(Boolean):[];
   showAlts(name,alts);
 }
 function showAlts(name,alts){
@@ -1029,12 +956,10 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-// KUVAT
 let _photoTarget='';
 function triggerPhotoInput(exName){
   _photoTarget=exName;
-  const inp=document.getElementById('photo-input');
-  inp.value='';inp.click();
+  const inp=document.getElementById('photo-input');inp.value='';inp.click();
 }
 function handlePhotoSelect(input){
   const file=input.files[0];if(!file)return;
@@ -1049,7 +974,7 @@ function handlePhotoSelect(input){
       const data=canvas.toDataURL('image/jpeg',0.72);
       exPhotos[_photoTarget]=data;
       try{localStorage.setItem('ep5',JSON.stringify(exPhotos));}
-      catch{toast('Kuva liian suuri tallennettavaksi');return;}
+      catch{toast('Kuva liian suuri');return;}
       DAYS.forEach(day=>{
         day.exercises.forEach((ex,ei)=>{
           if(ex.name===_photoTarget){
